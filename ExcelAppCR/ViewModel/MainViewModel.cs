@@ -1,4 +1,8 @@
-﻿using System;
+﻿using ExcelAppCR.Commands; 
+using ExcelAppCR.Service;
+using Microsoft.Win32;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -9,15 +13,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Microsoft.Win32;
-using ExcelAppCR.Commands; 
-using Serilog;
 
 
 namespace ExcelAppCR.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
+        //private int _rowCount;
+        //public int RowCount
+        //{
+        //    get => _rowCount;
+        //    set
+        //    {
+        //        _rowCount = value;
+        //        Log.Information("----- value RowCount : -----" + _rowCount);
+        //        RaisePropertyChange(nameof(RowCount));
+        //    }
+        //}
+
         private DataView _dataView;
         public DataView ExcelData
         {
@@ -29,64 +42,54 @@ namespace ExcelAppCR.ViewModel
                 RaisePropertyChange(nameof(ExcelData));
             }
         }
-        //ExcelService excelService;
+
+
+        ExcelService _excelService;
+        public ICommand OpenExcelCommand { get; set; }
+        public ICommand SaveFileCommand { get; set; }
+        public void InitData()
+        {
+            _excelService = new ExcelService();
+            OpenExcelCommand = new VfxCommand(OnOpen, () => true);
+            SaveFileCommand = new VfxCommand(OnSave, () => true);
+            //RowCount = 0;
+        }
         public MainViewModel()
         {
             InitData();
         }
 
-        public ICommand OpenExcelCommand { get; set; }
-        public ICommand SaveFileCommand { get; set; }
-        public void InitData()
-        {
-            //excelService = new ExcelService();
-            OpenExcelCommand = new VfxCommand(OnOpen, () => true);
-            SaveFileCommand = new VfxCommand(OnSave, () => true);
-        }
-
-
 
         private void OnSave(object obj)
         {
-            SaveFileDialog saveFile = new SaveFileDialog();
-            saveFile.DefaultExt = ".xlsx";
-            saveFile.Title = "Save Excel File";
-
+            SaveFileDialog saveFile = new SaveFileDialog
+            {
+                Title = "Save Excel File",
+                Filter = "Excel Files|*.xlsx",
+                DefaultExt = ".xlsx"
+            };
+           
         }
-        private void OnOpen(object obj)
+        private async void OnOpen(object obj)
         {
             try
             {
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm";
+                OpenFileDialog openFileDialog = new OpenFileDialog
+                {
+                    Title ="Select Excel File", 
+                    Filter = "Excel Files|*.xlsx" ,
+                    DefaultExt = ".xlsx"
+                };
                 if (openFileDialog.ShowDialog() != true)
                     return;
-                //var fs = File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read);
-                //Log.Information(" ----- Open File -----  : {FileName}", openFileDialog.FileName);
-                //var reader = ExcelDataReader.ExcelReaderFactory.CreateReader(fs);
-                //var conf = new ExcelDataSetConfiguration
-                //{
-                //    ConfigureDataTable = _ => new ExcelDataTableConfiguration
-                //    { 
-                //        UseHeaderRow = true
-                //    }
-                //};
-                //var ds = reader.AsDataSet(conf);
-                //if (ds.Tables.Count == 0)
-                //{
-                //    ExcelData = null;
-                //    return;
-                //}
-                //DataTable sheet = ds.Tables[0];
-
-                //var data = excelService.ReadExcelData(openFileDialog.FileName);
-                //ExcelData = data.DefaultView;
-                //MessageBox.Show("Load Excel File Success" + data.Rows.Count, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                //Log.Information(" ----- Load Excel File Success -----  : {Row}", data.Rows.Count);
-
+                var data = await _excelService.LoadExcelDataAsync(openFileDialog.FileName); 
+                ExcelData = data.DefaultView;  
+                
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Lỗi khi đọc file Excel:\n{ex.Message}",
+                              "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
                 Log.Error(" ----- Error Open File -----  : {Error}", ex.Message);
             }
         }
