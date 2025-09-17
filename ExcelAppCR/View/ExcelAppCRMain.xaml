@@ -31,6 +31,7 @@
                              CommandParameter="{Binding ElementName=_this}"
                              Command="{Binding OpenExcelCommand}"/>
 
+                        
                         <MenuItem 
                              Header="_Save"
                              Foreground="Black" 
