@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExcelAppCR.View"
+        xmlns:Icon ="http://metro.mahapps.com/winfx/xaml/controls"
         x:Name="_this"
         xmlns:viewModel="clr-namespace:ExcelAppCR.ViewModel"
         mc:Ignorable="d"
@@ -16,6 +17,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <StackPanel>
@@ -32,7 +34,7 @@
                              CommandParameter="{Binding ElementName=_this}"
                              Command="{Binding OpenExcelCommand}"/>
 
-                        
+
                         <MenuItem 
                              Header="_Save"
                              Foreground="Black" 
@@ -66,7 +68,16 @@
             </Border>
 
         </Grid>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
+            <TextBlock 
+                       Margin="10 5"
+                       FontWeight="Bold"
+                       FontSize="12"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center">
+                <Run Text="Total Row : " />
+                <Run Text="{Binding RowCount ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+            </TextBlock>
         </Grid>
 
     </Grid>

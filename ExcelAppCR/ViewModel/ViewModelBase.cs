@@ -11,7 +11,7 @@ namespace ExcelAppCR.ViewModel
     public class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected void RaisePropertyChange(string propertyName)
+        protected void RaisePropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
