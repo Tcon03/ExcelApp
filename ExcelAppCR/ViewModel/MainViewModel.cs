@@ -1,4 +1,4 @@
-﻿using ExcelAppCR.Commands; 
+﻿using ExcelAppCR.Commands;
 using ExcelAppCR.Service;
 using Microsoft.Win32;
 using Serilog;
@@ -17,19 +17,9 @@ using System.Windows.Input;
 
 namespace ExcelAppCR.ViewModel
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : PaggingVM
     {
-        //private int _rowCount;
-        //public int RowCount
-        //{
-        //    get => _rowCount;
-        //    set
-        //    {
-        //        _rowCount = value;
-        //        Log.Information("----- value RowCount : -----" + _rowCount);
-        //        RaisePropertyChange(nameof(RowCount));
-        //    }
-        //}
+       
 
         private DataView _dataView;
         public DataView ExcelData
@@ -39,7 +29,7 @@ namespace ExcelAppCR.ViewModel
             {
                 _dataView = value;
                 Log.Information("value DataView :" + _dataView);
-                RaisePropertyChange(nameof(ExcelData));
+                RaisePropertyChanged(nameof(ExcelData));
             }
         }
 
@@ -52,7 +42,6 @@ namespace ExcelAppCR.ViewModel
             _excelService = new ExcelService();
             OpenExcelCommand = new VfxCommand(OnOpen, () => true);
             SaveFileCommand = new VfxCommand(OnSave, () => true);
-            //RowCount = 0;
         }
         public MainViewModel()
         {
@@ -68,7 +57,7 @@ namespace ExcelAppCR.ViewModel
                 Filter = "Excel Files|*.xlsx",
                 DefaultExt = ".xlsx"
             };
-           
+
         }
         private async void OnOpen(object obj)
         {
@@ -76,15 +65,16 @@ namespace ExcelAppCR.ViewModel
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog
                 {
-                    Title ="Select Excel File", 
-                    Filter = "Excel Files|*.xlsx" ,
+                    Title = "Select Excel File",
+                    Filter = "Excel Files|*.xlsx",
                     DefaultExt = ".xlsx"
                 };
                 if (openFileDialog.ShowDialog() != true)
                     return;
-                var data = await _excelService.LoadExcelDataAsync(openFileDialog.FileName); 
-                ExcelData = data.DefaultView;  
-                
+                var data = await _excelService.LoadExcelDataAsync(openFileDialog.FileName);
+                ExcelData = data.DefaultView;
+                RowCount = data.Rows.Count;
+
             }
             catch (Exception ex)
             {
