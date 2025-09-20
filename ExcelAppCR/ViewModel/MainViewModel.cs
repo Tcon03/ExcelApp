@@ -19,7 +19,8 @@ namespace ExcelAppCR.ViewModel
 {
     public class MainViewModel : PaggingVM
     {
-       
+
+        string _filePath; 
 
         private DataView _dataView;
         public DataView ExcelData
@@ -28,7 +29,9 @@ namespace ExcelAppCR.ViewModel
             set
             {
                 _dataView = value;
-                Log.Information("value DataView :" + _dataView);
+                Log.Information("ExcelData set. Rows={Rows}, Columns={Cols}",
+              _dataView?.Count ?? 0,
+              _dataView?.Table?.Columns?.Count ?? 0);
                 RaisePropertyChanged(nameof(ExcelData));
             }
         }
@@ -61,26 +64,38 @@ namespace ExcelAppCR.ViewModel
         }
         private async void OnOpen(object obj)
         {
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "Select Excel File",
+                Filter = "Excel Files|*.xlsx",
+                DefaultExt = ".xlsx"
+            };
+            if (openFileDialog.ShowDialog() != true)
+                return;
+            _filePath = openFileDialog.FileName;
+            IsProcessing = true;
+
             try
             {
-                OpenFileDialog openFileDialog = new OpenFileDialog
-                {
-                    Title = "Select Excel File",
-                    Filter = "Excel Files|*.xlsx",
-                    DefaultExt = ".xlsx"
-                };
-                if (openFileDialog.ShowDialog() != true)
-                    return;
-                var data = await _excelService.LoadExcelDataAsync(openFileDialog.FileName);
-                ExcelData = data.DefaultView;
-                RowCount = data.Rows.Count;
+               var totalRows = await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
+                Log.Information("Total Rows in Excel: {TotalRows}", totalRows);
+                TotalPages = (int)Math.Ceiling((double)totalRows / PageSize);
+               Log.Information("Total Pages: {TotalPages}", TotalPages);
+                var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize)); 
 
+                ExcelData = dataTable.DefaultView; 
+                RowCount = dataTable.Rows.Count;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi đọc file Excel:\n{ex.Message}",
+                MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
                               "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-                Log.Error(" ----- Error Open File -----  : {Error}", ex.Message);
+            }
+            finally
+            {
+                IsProcessing = false; 
+                RefreshPaging();
             }
         }
     }

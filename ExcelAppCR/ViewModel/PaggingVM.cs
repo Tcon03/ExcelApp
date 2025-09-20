@@ -1,16 +1,52 @@
-﻿using Serilog;
+﻿using ExcelAppCR.Commands;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ExcelAppCR.ViewModel
 {
-    public class PaggingVM : ViewModelBase
+    public abstract class PaggingVM : ViewModelBase
     {
-        private int _pageSize = 500;
+        public PaggingVM()
+        {
+            NextPageCommand = new VfxCommand(OnNextPage, CanGoNextPage);
+            PreviousPageCommand = new VfxCommand(OnPreviousPage, CanGoPreviousPage);
+        }
+
+        public bool CanGoPreviousPage()
+        {
+            if (PageIndex > 1)
+                return true;
+            return false;
+        }
+
+        public void OnPreviousPage(object obj)
+        {
+            if (PageIndex > 1)
+                PageIndex--;
+            Log.Information("Navigated to Previous Page: {PageIndex}", PageIndex);
+        }
+
+        public bool CanGoNextPage()
+        {
+            if (PageIndex < TotalPages)
+                return true;
+            return false;
+        }
+
+        public void OnNextPage(object obj)
+        {
+            if (PageIndex < TotalPages)
+                PageIndex++;
+            Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
+        }
+
+        private int _pageSize = 10;
         public int PageSize
         {
             get { return _pageSize; }
@@ -19,11 +55,12 @@ namespace ExcelAppCR.ViewModel
                 if (_pageSize != value)
                 {
                     _pageSize = value;
-                    Log.Information("Page Size Changed : " + _pageSize);
-                    RaisePropertyChanged(nameof(PageSize));
+                    Log.Information("Page Size Changed : {PageSize}", _pageSize);
+                    RaisePropertyChanged(nameof(PageSize)); 
                 }
             }
         }
+
         private int _rowCount = 0;
         public int RowCount
         {
@@ -32,14 +69,14 @@ namespace ExcelAppCR.ViewModel
             {
                 if (_rowCount != value)
                 {
-                    _rowCount = value; 
-                    Log.Information("Row Count Changed : " + _rowCount);
+                    _rowCount = value;
+                    Log.Information("Row Count Changed : {RowCount}", _rowCount);
                     RaisePropertyChanged(nameof(RowCount));
                 }
             }
-        } 
+        }
 
-        private int _pageIndex = 1; 
+        private int _pageIndex = 1;
         public int PageIndex
         {
             get { return _pageIndex; }
@@ -48,18 +85,49 @@ namespace ExcelAppCR.ViewModel
                 if (_pageIndex != value)
                 {
                     _pageIndex = value;
-                    Log.Information("Page Index Changed : " + _pageIndex);
+                    Log.Information("Page Index Changed : {PageIndex}", _pageIndex);
                     RaisePropertyChanged(nameof(PageIndex));
+                    RefreshPaging();
                 }
             }
-        } 
+        }
+        private int _totalPages = 0;
         public int TotalPages
         {
             get
             {
-                if (PageSize == 0) return 0; // Prevent division by zero
-                return (int)Math.Ceiling((double)RowCount / PageSize);
+               return _totalPages;
+            }
+            set
+            {
+                if (_totalPages != value)
+                {
+                    _totalPages = value;
+                    Log.Information("Total Pages Changed : {TotalPages}", _totalPages);
+                    RaisePropertyChanged(nameof(TotalPages));
+                }
             }
         }
+
+        private bool _isProcessing;
+        public bool IsProcessing
+        {
+            get => _isProcessing;
+            set
+            {
+                _isProcessing = value;
+                Log.Information("IsProcessing Changed : {IsProcessing}", _isProcessing);
+                RaisePropertyChanged(nameof(IsNotProcessing));
+            }
+        }
+        public void RefreshPaging()
+        {
+            (NextPageCommand as VfxCommand)?.RaiseCanExecuteChanged();
+            (PreviousPageCommand as VfxCommand)?.RaiseCanExecuteChanged();
+        }
+        public bool IsNotProcessing => !_isProcessing;
+
+        public ICommand NextPageCommand { get; set; }
+        public ICommand PreviousPageCommand { get; set; }
     }
 }
