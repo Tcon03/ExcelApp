@@ -1,0 +1,193 @@
+﻿<Window x:Class="Test2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Test2"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header với các nút chức năng -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="10">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center">
+                <Button x:Name="BtnOpenFile" 
+                        Content="📂 Open Excel File" 
+                        Width="150" Height="40" Margin="5"
+                        Command="{Binding OpenFileCommand}"
+                        Background="#3498DB" Foreground="White"
+                        BorderThickness="0" FontWeight="Bold"/>
+
+                <Button x:Name="BtnProcessData" 
+                        Content="⚙️ Process Data" 
+                        Width="150" Height="40" Margin="5"
+                        Command="{Binding ProcessDataCommand}"
+                        Background="#27AE60" Foreground="White"
+                        BorderThickness="0" FontWeight="Bold"
+                        IsEnabled="{Binding IsFileLoaded}"/>
+
+                <Button x:Name="BtnSaveFile" 
+                        Content="💾 Save Result" 
+                        Width="150" Height="40" Margin="5"
+                        Command="{Binding SaveFileCommand}"
+                        Background="#E74C3C" Foreground="White"
+                        BorderThickness="0" FontWeight="Bold"
+                        IsEnabled="{Binding HasProcessedData}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Thông tin file và trạng thái -->
+        <Border Grid.Row="1" Background="#ECF0F1" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="📄 Input File:"
+                               FontWeight="Bold"
+                               Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding InputFileName}" 
+                               TextWrapping="Wrap"
+                               Foreground="#2C3E50"/>
+                    <TextBlock Text="{Binding InputFileInfo}" 
+                               Foreground="#7F8C8D" FontSize="11"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="📊 Processing Status:" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding ProcessingStatus}" 
+                               Foreground="#2C3E50"/>
+                    <TextBlock Text="{Binding ProcessingDetails}" 
+                               Foreground="#7F8C8D" 
+                               FontSize="11"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Progress và Data Preview -->
+        <Grid Grid.Row="2" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Progress Bar -->
+            <Border Grid.Row="0" Background="White" BorderBrush="#BDC3C7" 
+                    BorderThickness="1" Padding="10" Margin="0,0,0,10">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" 
+                                   Text="{Binding ProgressText}" 
+                                   FontWeight="Bold"/>
+                        <TextBlock Grid.Column="1" 
+                                   Text="{Binding ProgressPercentage, StringFormat='{}{0:F1}%'}" 
+                                   FontWeight="Bold"
+                                   Foreground="#3498DB"/>
+                    </Grid>
+
+                    <ProgressBar Height="20" 
+                                 Margin="0,5,0,0"
+                                 Value="{Binding ProgressPercentage}"
+                                 Background="#ECF0F1"
+                                 Foreground="#3498DB"/>
+
+                    <TextBlock Text="{Binding ElapsedTime}" 
+                               FontSize="10" 
+                               Foreground="#7F8C8D" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Data Preview với Virtual DataGrid -->
+            <Border Grid.Row="1" 
+                    Background="White"
+                    BorderBrush="#BDC3C7"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#34495E" Padding="5">
+                        <TextBlock Text="📋 Data Preview (First 1000 rows max)" 
+                                   Foreground="White" FontWeight="Bold"/>
+                    </Border>
+
+                    <DataGrid Grid.Row="1" 
+                              x:Name="DataPreview"
+                              ItemsSource="{Binding PreviewData}"
+                              AutoGenerateColumns="True"
+                              IsReadOnly="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              AlternatingRowBackground="#F8F9FA"
+                              RowBackground="White"
+                              FontSize="11"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              ScrollViewer.CanContentScroll="True">
+
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#3498DB"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="5"/>
+                                <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                <Setter Property="BorderBrush" Value="White"/>
+                            </Style>
+                        </DataGrid.Resources>
+                    </DataGrid>
+
+                    <!-- Overlay khi không có dữ liệu -->
+                    <Border Grid.Row="1" Background="White" 
+                            Visibility="{Binding ShowNoDataMessage, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="📄" FontSize="48" HorizontalAlignment="Center" 
+                                       Foreground="#BDC3C7"/>
+                            <TextBlock Text="No data loaded yet" 
+                                       FontSize="16" Foreground="#7F8C8D" 
+                                       HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                            <TextBlock Text="Click 'Open Excel File' to get started" 
+                                       FontSize="12" Foreground="#95A5A6" 
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="3" Background="#2C3E50">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="White"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Memory: " Foreground="White"/>
+                    <TextBlock Text="{Binding MemoryUsage}" Foreground="#E74C3C" FontWeight="Bold"/>
+                    <TextBlock Text=" | Rows: " Foreground="White" Margin="10,0,0,0"/>
+                    <TextBlock Text="{Binding TotalRows}" Foreground="#27AE60" FontWeight="Bold"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

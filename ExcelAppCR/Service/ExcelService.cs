@@ -1,6 +1,7 @@
 ﻿using ExcelAppCR.Model;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,11 +17,10 @@ namespace ExcelAppCR.Service
     {
         public ExcelService()
         {
-
             ExcelPackage.License.SetNonCommercialPersonal("Nguyen Truong");
         }
 
-      
+
 
         /// <summary>
         /// Load dữ liệu từ file Excel
@@ -39,6 +39,7 @@ namespace ExcelAppCR.Service
                         throw new InvalidOperationException("File Excel không có worksheet nào.");
 
                     var worksheet = package.Workbook.Worksheets[0];
+
 
                     if (worksheet.Dimension == null)
                         return dataTable; // Trả về DataTable rỗng nếu không có dữ liệu
@@ -80,31 +81,92 @@ namespace ExcelAppCR.Service
             });
         }
 
+
         /// <summary>
-        /// Lấy thông tin cơ bản về file Excel
+        /// Load file Excel theo trang (pagination)
         /// </summary>
-        /// <param name="filePath">Đường dẫn file Excel</param>
-        /// <returns>Thông tin file</returns>
-        public ExcelFileInfo GetExcelInfo(string filePath)
+        /// <param name="filePath"> Đường dẫn của file Excel </param>
+        /// <param name="pageIndex"> số thứ tự page muốn lấy </param>
+        /// <param name="pageSize"> Kích thước cuẩ mỗi page 100 ,1000 </param>
+        /// <returns> dataTable chứa dữ liệu</returns>
+        public DataTable LoadExcelPage(string filePath, int pageIndex, int pageSize)
         {
-            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            try
             {
-                if (package.Workbook.Worksheets.Count == 0)
-                    return new ExcelFileInfo { SheetCount = 0, RowCount = 0, ColumnCount = 0 };
+                // 1. lấy ra một dataTable rỗng
+                var dataTable = new DataTable();
 
-                var worksheet = package.Workbook.Worksheets[0];
+                //2. xác định vị trí file excel
+                var fileInfo = new FileInfo(filePath);
+                Log.Information("Getting total row count from file: {FilePath}", filePath);
 
-                if (worksheet.Dimension == null)
-                    return new ExcelFileInfo { SheetCount = package.Workbook.Worksheets.Count, RowCount = 0, ColumnCount = 0 };
-
-                return new ExcelFileInfo
+                //3 . mở file excel và đọc dữ liệu
+                using (var package = new ExcelPackage(fileInfo))
                 {
-                    SheetCount = package.Workbook.Worksheets.Count,
-                    RowCount = worksheet.Dimension.End.Row,
-                    ColumnCount = worksheet.Dimension.End.Column,
-                    SheetName = worksheet.Name
-                };
+                    // 3.1 mở file excel và lấy ra sheet đầu tiên
+                    var worksheet = package.Workbook.Worksheets[0];
+                    Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
+
+                    //3.2 kiểm tra file excel có dữ liệu hay không nếu kh thì trả về dataTable rỗng
+                    if (worksheet.Dimension == null)
+                        return dataTable;
+
+                    //3.3 lấy ra tổng số dòng và cột trong file excel
+                    var totalRows = worksheet.Dimension.Rows; // đếm xem có bao nhiêu dòng trong file excel
+                    Log.Information("Total Rows in Excel ......: {TotalRows}", totalRows);
+
+                    //3.4 Đếm xem có bao nhiêu cột trong file excel
+                    var colCount = worksheet.Dimension.Columns;
+                    Log.Information("Total Columns in Excel: {ColCount}", colCount);
+
+
+                    // 3.5 nhìn vào cột đầu tiên và tạo các column tương ứng trong dataTable
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        dataTable.Columns.Add(worksheet.Cells[1, col].Value?.ToString() ?? $"Col{col}");
+                    }
+
+                    // Vì dòng 1 của Excel là dòng tiêu đề, nên dữ liệu thực tế bắt đầu từ dòng 2.Vậy nên, dòng dữ liệu thứ 10 sẽ
+                    //nằm ở hàng 11 trong Excel. Dòng bắt đầu của trang 2 sẽ là hàng 12.Phép toán(2 - 1) * 10 + 2 = 12 là hoàn toàn chính xác.
+                    var startRow = (pageIndex - 1) * pageSize + 2;
+                    Log.Information("Loading Page {PageIndex}, Start Row: {StartRow}", pageIndex, startRow);
+
+                    var endRow = Math.Min(startRow + pageSize - 1, totalRows);
+                    Log.Information("End Row: {EndRow}", endRow);
+
+                    // Chỉ lặp qua các dòng trong trang hiện tại
+                    for (int row = startRow; row <= endRow; row++)
+                    {
+                        var dataRow = dataTable.NewRow();
+                        Log.Information("Reading Row: {Row}", row);
+
+                        for (int col = 1; col <= colCount; col++)
+                        {
+                            dataRow[col - 1] = worksheet.Cells[row, col].Value;
+                        }
+                        dataTable.Rows.Add(dataRow);
+                    }
+                }
+
+                return dataTable;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error loading Excel page: {Message}", ex.Message);
+                return default;
             }
         }
+        public async Task<long> GetTotalRowCount(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+            Log.Information("Getting total row count from file: {FilePath}", filePath);
+            using (var package = new ExcelPackage(fileInfo))
+            {
+                var worksheet = package.Workbook.Worksheets[0];
+                Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
+             return worksheet.Dimension?.Rows ?? 0;
+            }
+        }
+
     }
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAppCR", "ExcelAppCR\Ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test01", "Test01\Test01.csproj", "{EDBDCDDC-D749-41D7-B591-98EBA42E53A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test2", "Test2\Test2.csproj", "{30ADD701-73FA-4A5E-8A23-9536DBF7C4C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{EDBDCDDC-D749-41D7-B591-98EBA42E53A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDBDCDDC-D749-41D7-B591-98EBA42E53A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDBDCDDC-D749-41D7-B591-98EBA42E53A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30ADD701-73FA-4A5E-8A23-9536DBF7C4C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30ADD701-73FA-4A5E-8A23-9536DBF7C4C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30ADD701-73FA-4A5E-8A23-9536DBF7C4C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30ADD701-73FA-4A5E-8A23-9536DBF7C4C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

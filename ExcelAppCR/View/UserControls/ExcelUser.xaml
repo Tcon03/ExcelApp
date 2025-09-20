@@ -5,24 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ExcelAppCR.View.UserControls"
              mc:Ignorable="d" 
+             x:Name="root"
              xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Border Background="White"
-         BorderBrush="Gray"
-         BorderThickness="1"
-         CornerRadius="10">
-        <Grid Margin="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <Border Margin="10"
+             d:DesignHeight="600" d:DesignWidth="1280">
+
+    <Grid Margin="0" 
+              d:Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Border Margin="5"
                     BorderThickness="1"
                     BorderBrush="Gray"
                     CornerRadius="10">
-                <DataGrid Background="Transparent"
+            <DataGrid Background="Transparent"
                         BorderBrush="Transparent" 
                         BorderThickness="0"
+                        RowHeight="25"
+                        AlternatingRowBackground="#F8F9FA"
                         AutoGenerateColumns="True" 
                         EnableRowVirtualization="True"
                         IsReadOnly="True" 
@@ -30,34 +31,77 @@
                         VirtualizingPanel.VirtualizationMode="Recycling"
                         ItemsSource="{Binding ExcelData}"
                         Margin="5">
-                </DataGrid>
-            </Border>
+            </DataGrid>
+        </Border>
 
-            <Grid Grid.Row="1">
-                <TextBlock HorizontalAlignment="Left" 
-                           FontWeight="Medium"
-                           VerticalAlignment="Center"
-                           FontSize="20">
+        <Grid Grid.Row="1">
+            <TextBlock HorizontalAlignment="Left" 
+                       Margin="10 0"
+                       FontFamily="/Fonts/Nexa.ttf#Nexa"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       FontSize="18">
                      <Run Text="Total Row :"/>
                      <Run Text="{Binding RowCount , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
+            </TextBlock>
+
+            <StackPanel HorizontalAlignment="Right"
+                        Margin="10 5 15 5"
+                        Orientation="Horizontal">
+                <TextBlock Text="📊 Processing Status:" 
+                            FontWeight="Bold"
+                            FontSize="15"
+                            FontFamily="/Fonts/Nexa.ttf#Nexa"
+                            VerticalAlignment="Center"
+                            Margin="0,0,10,0"/>
+
+                <ProgressBar Height="20" 
+                             Margin="0 0 50 0"
+                             VerticalAlignment="Center"
+                             Foreground="#3498DB"
+                             Background="Azure"
+                             Width="200"/>
+                <TextBlock Text="Page Size :" 
+                           FontSize="18"
+                           FontWeight="Bold"
+                           FontFamily="/Fonts/Nexa.ttf#Nexa"
+                           Margin="0 0 10 5"
+                           VerticalAlignment="Center"/>
+                <ComboBox Width="80" 
+                          Height="25"
+                          SelectedValue="{Binding PageSize}"
+                          VerticalAlignment="Center"
+                          Margin="0,0,20,0">
+                    <ComboBoxItem Content="100"/>
+                    <ComboBoxItem Content="500"/>
+                    <ComboBoxItem Content="1000"/>
+                    <ComboBoxItem Content="2000"/>
+                    <ComboBoxItem Content="5000"/>
+                </ComboBox>
+                <Button Style="{StaticResource btnNP }"
+                        Command="{Binding PreviousPageCommand}"
+                        CommandParameter="{Binding ElementName=root}">
+                    <Image Source="/Images/backP.png"
+                            Margin="5"/>
+                </Button>
+                <TextBlock 
+                        FontWeight="Bold"
+                        FontSize="20"
+                        VerticalAlignment="Center">
+                    <Run Text="{Binding PageIndex , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
+                    <Run Text="of"/> 
+                    <Run Text="{Binding TotalPages , Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 </TextBlock>
+                <Button Style="{StaticResource btnNP}"
+                        Command="{Binding NextPageCommand }" 
+                        CommandParameter="{Binding ElementName=root}">
+                    <Image Source="/Images/nextP.png"
+                           Margin="5"/>
+                </Button>
+            </StackPanel>
 
-                <StackPanel HorizontalAlignment="Right"
-                            Orientation="Horizontal">
-                    <Button Style="{StaticResource btnNP }">
-                        <Image Source="/Images/backP.png"/>
-                    </Button>
-                    <TextBlock Text=" of "
-                               FontWeight="Medium"
-                               FontSize="25"
-                               VerticalAlignment="Center"/>
-                    <Button Style="{StaticResource btnNP}" >
-                        <Image Source="/Images/nextP.png"/>
-                    </Button>
-                </StackPanel>
-
-            </Grid>
         </Grid>
+    </Grid>
 
-    </Border>
+
 </UserControl>
