@@ -27,59 +27,62 @@ namespace ExcelAppCR.Service
         /// </summary>
         /// <param name="filePath">Đường dẫn file Excel</param>
         /// <returns>DataTable chứa dữ liệu</returns>
-        public async Task<DataTable> LoadExcelDataAsync(string filePath)
-        {
-            return await Task.Run(() =>
-            {
-                var dataTable = new DataTable();
+        //public async Task<DataTable> LoadExcelDataAsync(string filePath)
+        //{
+        //    return await Task.Run(() =>
+        //    {
+        //        var dataTable = new DataTable();
 
-                using (var package = new ExcelPackage(new FileInfo(filePath)))
-                {
-                    if (package.Workbook.Worksheets.Count == 0)
-                        throw new InvalidOperationException("File Excel không có worksheet nào.");
+        //        using (var package = new ExcelPackage(new FileInfo(filePath)))
+        //        {
+        //            if (package.Workbook.Worksheets.Count == 0)
+        //                throw new InvalidOperationException("File Excel không có worksheet nào.");
 
-                    var worksheet = package.Workbook.Worksheets[0];
+        //            var worksheet = package.Workbook.Worksheets[0];
 
 
-                    if (worksheet.Dimension == null)
-                        return dataTable; // Trả về DataTable rỗng nếu không có dữ liệu
+        //            if (worksheet.Dimension == null)
+        //                return dataTable; // Trả về DataTable rỗng nếu không có dữ liệu
 
-                    var start = worksheet.Dimension.Start;
-                    var end = worksheet.Dimension.End;
+        //            var start = worksheet.Dimension.Start;
+        //            var end = worksheet.Dimension.End;
 
-                    // Tạo columns từ hàng đầu tiên (header)
-                    for (int col = start.Column; col <= end.Column; col++)
-                    {
-                        var headerValue = worksheet.Cells[start.Row, col].Value?.ToString();
-                        if (string.IsNullOrWhiteSpace(headerValue))
-                            headerValue = $"Column{col}";
+        //            // Tạo columns từ hàng đầu tiên (header)
+        //            for (int col = start.Column; col <= end.Column; col++)
+        //            {
+        //                var headerValue = worksheet.Cells[start.Row, col].Value?.ToString();
+        //                if (string.IsNullOrWhiteSpace(headerValue))
+        //                    headerValue = $"Column{col}";
 
-                        dataTable.Columns.Add(headerValue);
-                    }
+        //                dataTable.Columns.Add(headerValue);
+        //            }
 
-                    // Đọc dữ liệu từ hàng thứ 2
-                    for (int row = start.Row + 1; row <= end.Row; row++)
-                    {
-                        var dataRow = dataTable.NewRow();
-                        bool hasData = false;
+        //            // Đọc dữ liệu từ hàng thứ 2
+        //            for (int row = start.Row + 1; row <= end.Row; row++)
+        //            {
+        //                var dataRow = dataTable.NewRow();
+        //                bool hasData = false;
 
-                        for (int col = start.Column; col <= end.Column; col++)
-                        {
-                            var cellValue = worksheet.Cells[row, col].Value;
-                            dataRow[col - start.Column] = cellValue?.ToString() ?? string.Empty;
+        //                for (int col = start.Column; col <= end.Column; col++)
+        //                {
+        //                    var cellValue = worksheet.Cells[row, col].Value;
+        //                    dataRow[col - start.Column] = cellValue?.ToString() ?? string.Empty;
 
-                            if (cellValue != null && !string.IsNullOrWhiteSpace(cellValue.ToString()))
-                                hasData = true;
-                        }
+        //                    if (cellValue != null && !string.IsNullOrWhiteSpace(cellValue.ToString()))
+        //                        hasData = true;
+        //                }
 
-                        // Chỉ thêm row nếu có dữ liệu
-                        if (hasData)
-                            dataTable.Rows.Add(dataRow);
-                    }
-                }
-                return dataTable;
-            });
-        }
+        //                // Chỉ thêm row nếu có dữ liệu
+        //                if (hasData)
+        //                    dataTable.Rows.Add(dataRow);
+        //            }
+        //        }
+        //        return dataTable;
+        //    });
+        //}
+
+
+
 
 
         /// <summary>
@@ -131,15 +134,17 @@ namespace ExcelAppCR.Service
                     var startRow = (pageIndex - 1) * pageSize + 2;
                     Log.Information("Loading Page {PageIndex}, Start Row: {StartRow}", pageIndex, startRow);
 
+                    //hàng kết thúc được lấy ra là start + sizeof - 1 header 
                     var endRow = Math.Min(startRow + pageSize - 1, totalRows);
                     Log.Information("End Row: {EndRow}", endRow);
 
-                    // Chỉ lặp qua các dòng trong trang hiện tại
+                    // Chỉ lặp qua thời điểm bắt đầu và đk kết thúc
                     for (int row = startRow; row <= endRow; row++)
                     {
                         var dataRow = dataTable.NewRow();
                         Log.Information("Reading Row: {Row}", row);
 
+                        // lắp qua all các cột 
                         for (int col = 1; col <= colCount; col++)
                         {
                             dataRow[col - 1] = worksheet.Cells[row, col].Value;
@@ -164,7 +169,11 @@ namespace ExcelAppCR.Service
             {
                 var worksheet = package.Workbook.Worksheets[0];
                 Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
-             return worksheet.Dimension?.Rows ?? 0;
+                if (worksheet.Dimension == null)
+                    return 0;
+                var totalRows = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
+                Log.Information("Total Rows in Excel ......: {TotalRows}", totalRows);
+                return totalRows;
             }
         }
 

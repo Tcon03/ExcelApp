@@ -20,7 +20,7 @@ namespace ExcelAppCR.ViewModel
     public class MainViewModel : PaggingVM
     {
 
-        string _filePath; 
+        string _filePath;
 
         private DataView _dataView;
         public DataView ExcelData
@@ -29,9 +29,8 @@ namespace ExcelAppCR.ViewModel
             set
             {
                 _dataView = value;
-                Log.Information("ExcelData set. Rows={Rows}, Columns={Cols}",
-              _dataView?.Count ?? 0,
-              _dataView?.Table?.Columns?.Count ?? 0);
+                Log.Information("ExcelData set. Rows={Rows}, Columns={Cols}");
+
                 RaisePropertyChanged(nameof(ExcelData));
             }
         }
@@ -78,26 +77,32 @@ namespace ExcelAppCR.ViewModel
 
             try
             {
-               var totalRows = await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
-                Log.Information("Total Rows in Excel: {TotalRows}", totalRows);
-                TotalPages = (int)Math.Ceiling((double)totalRows / PageSize);
-               Log.Information("Total Pages: {TotalPages}", TotalPages);
-                var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize)); 
-
-                ExcelData = dataTable.DefaultView; 
-                RowCount = dataTable.Rows.Count;
+                LoadPageData();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
-                              "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+                                 "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                IsProcessing = false; 
-                RefreshPaging();
+                IsProcessing = false;
             }
         }
+
+        protected async override void LoadPageData()
+        {
+            RowCount = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
+            Log.Information("RowCount :" + RowCount);
+            TotalPages = (int)Math.Ceiling((double)RowCount / PageSize);
+            Log.Information("Total Pages: {TotalPages}", TotalPages);
+            var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize));
+            ExcelData = dataTable.DefaultView;
+            RefreshPaging();
+
+        }
+
     }
 }
+
 

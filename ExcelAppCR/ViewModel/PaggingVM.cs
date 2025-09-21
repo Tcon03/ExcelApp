@@ -46,7 +46,7 @@ namespace ExcelAppCR.ViewModel
             Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
         }
 
-        private int _pageSize = 10;
+        private int _pageSize = 1000;
         public int PageSize
         {
             get { return _pageSize; }
@@ -56,7 +56,7 @@ namespace ExcelAppCR.ViewModel
                 {
                     _pageSize = value;
                     Log.Information("Page Size Changed : {PageSize}", _pageSize);
-                    RaisePropertyChanged(nameof(PageSize)); 
+                    RaisePropertyChanged(nameof(PageSize));
                 }
             }
         }
@@ -87,7 +87,7 @@ namespace ExcelAppCR.ViewModel
                     _pageIndex = value;
                     Log.Information("Page Index Changed : {PageIndex}", _pageIndex);
                     RaisePropertyChanged(nameof(PageIndex));
-                    RefreshPaging();
+                    LoadPageData();
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace ExcelAppCR.ViewModel
         {
             get
             {
-               return _totalPages;
+                return _totalPages;
             }
             set
             {
@@ -129,5 +129,6 @@ namespace ExcelAppCR.ViewModel
 
         public ICommand NextPageCommand { get; set; }
         public ICommand PreviousPageCommand { get; set; }
+        protected abstract void LoadPageData();
     }
 }
