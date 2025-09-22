@@ -12,40 +12,7 @@ namespace ExcelAppCR.ViewModel
 {
     public abstract class PaggingVM : ViewModelBase
     {
-        public PaggingVM()
-        {
-            NextPageCommand = new VfxCommand(OnNextPage, CanGoNextPage);
-            PreviousPageCommand = new VfxCommand(OnPreviousPage, CanGoPreviousPage);
-        }
-
-        public bool CanGoPreviousPage()
-        {
-            if (PageIndex > 1)
-                return true;
-            return false;
-        }
-
-        public void OnPreviousPage(object obj)
-        {
-            if (PageIndex > 1)
-                PageIndex--;
-            Log.Information("Navigated to Previous Page: {PageIndex}", PageIndex);
-        }
-
-        public bool CanGoNextPage()
-        {
-            if (PageIndex < TotalPages)
-                return true;
-            return false;
-        }
-
-        public void OnNextPage(object obj)
-        {
-            if (PageIndex < TotalPages)
-                PageIndex++;
-            Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
-        }
-
+        #region
         private int _pageSize = 1000;
         public int PageSize
         {
@@ -88,6 +55,7 @@ namespace ExcelAppCR.ViewModel
                     Log.Information("Page Index Changed : {PageIndex}", _pageIndex);
                     RaisePropertyChanged(nameof(PageIndex));
                     LoadPageData();
+                    RefreshPaging();
                 }
             }
         }
@@ -105,11 +73,21 @@ namespace ExcelAppCR.ViewModel
                     _totalPages = value;
                     Log.Information("Total Pages Changed : {TotalPages}", _totalPages);
                     RaisePropertyChanged(nameof(TotalPages));
+                    RefreshPaging();
                 }
             }
         }
+        // công tắc trạng thái ngược lại của IsProcessing
+        //public bool IsNotProcessing
+        //{
+        //    get
+        //    {
+        //        return !_isProcessing;
+        //    }
 
-        private bool _isProcessing;
+        //}
+        // Công tắc  biết đang trong quá trình xử lý
+        private bool _isProcessing; // true : đang xử lý , false : không xử lý
         public bool IsProcessing
         {
             get => _isProcessing;
@@ -117,18 +95,57 @@ namespace ExcelAppCR.ViewModel
             {
                 _isProcessing = value;
                 Log.Information("IsProcessing Changed : {IsProcessing}", _isProcessing);
-                RaisePropertyChanged(nameof(IsNotProcessing));
+                RaisePropertyChanged(nameof(IsProcessing));
+                //RaisePropertyChanged(nameof(IsNotProcessing));
             }
         }
+
+        #endregion
+
+
+        public PaggingVM()
+        {
+            NextPageCommand = new VfxCommand(OnNextPage, CanGoNextPage);
+            PreviousPageCommand = new VfxCommand(OnPreviousPage, CanGoPreviousPage);
+        }
+
+        public bool CanGoPreviousPage()
+        {
+            if (PageIndex > 1)
+                return true;
+            return false;
+        }
+
+        public void OnPreviousPage(object obj)
+        {
+            if (PageIndex > 1)
+                PageIndex--;
+            Log.Information("Navigated to Previous Page: {PageIndex}", PageIndex);
+        }
+
+        public bool CanGoNextPage()
+        {
+            if (PageIndex < TotalPages )
+                return true;
+            return false;
+        }
+
+        public void OnNextPage(object obj)
+        {
+            if (PageIndex < TotalPages)
+                PageIndex++;
+            Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
+        }
+
+        
         public void RefreshPaging()
         {
             (NextPageCommand as VfxCommand)?.RaiseCanExecuteChanged();
             (PreviousPageCommand as VfxCommand)?.RaiseCanExecuteChanged();
         }
-        public bool IsNotProcessing => !_isProcessing;
 
         public ICommand NextPageCommand { get; set; }
         public ICommand PreviousPageCommand { get; set; }
-        protected abstract void LoadPageData();
+        protected abstract Task LoadPageData();
     }
 }

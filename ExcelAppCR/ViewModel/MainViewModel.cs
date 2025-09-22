@@ -77,7 +77,10 @@ namespace ExcelAppCR.ViewModel
 
             try
             {
-                LoadPageData();
+                RowCount = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
+                Log.Information("RowCount :" + RowCount);
+
+                await LoadPageData();
             }
             catch (Exception ex)
             {
@@ -86,19 +89,18 @@ namespace ExcelAppCR.ViewModel
             }
             finally
             {
+                RefreshPaging();
                 IsProcessing = false;
             }
         }
 
-        protected async override void LoadPageData()
+        protected async override Task LoadPageData()
         {
-            RowCount = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
-            Log.Information("RowCount :" + RowCount);
             TotalPages = (int)Math.Ceiling((double)RowCount / PageSize);
             Log.Information("Total Pages: {TotalPages}", TotalPages);
+
             var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize));
             ExcelData = dataTable.DefaultView;
-            RefreshPaging();
 
         }
 
