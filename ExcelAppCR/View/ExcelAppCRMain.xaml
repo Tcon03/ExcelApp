@@ -29,6 +29,8 @@
                          Style="{StaticResource MenuItemStyle}">
                         <MenuItem 
                              Header="_New"
+                            Command="{Binding NewFile}" 
+                            CommandParameter="{Binding ElementName=_this}"
                              Foreground="Black" />
                         <MenuItem 
                              Header="_Open"

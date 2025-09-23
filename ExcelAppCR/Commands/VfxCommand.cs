@@ -18,7 +18,7 @@ namespace ExcelAppCR.Commands
         public VfxCommand(Action<object> executeMethod)
         {
             _TargetExecuteMethod = executeMethod;
-            
+
         }
 
         public VfxCommand(Action<object> executeMethod, Func<bool> canExecuteMethod)

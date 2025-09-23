@@ -3,470 +3,76 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Test2" d:DataContext="{d:DesignInstance Type=local:MainViewModel}"
+        xmlns:local="clr-namespace:Test2" 
         mc:Ignorable="d"
         Title="Window1" Height="450" Width="800">
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <ProgressBar Width="250" Height="16"
+Minimum="0" Maximum="100"
+Value="{Binding ProgressPercent}"/>
+            </StatusBarItem>
+            <StatusBarItem Content="{Binding StatusText}"/>
+        </StatusBar>
 
-        <!-- Button Styles -->
-        <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#3498DB"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="5"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2980B9"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#21618C"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#BDC3C7"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
 
-        <Style x:Key="SuccessButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-            <Setter Property="Background" Value="#27AE60"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#229954"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <StackPanel Orientation="Horizontal" Margin="10" DockPanel.Dock="Top" >
+            <TextBox Width="420" Text="{Binding InputPath, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="Browse" Command="{Binding BrowseInputCommand}"/>
+            <Button Content="Import → Stage" Command="{Binding ImportCommand}"/>
+            <Button Content="Export Excel" Command="{Binding ExportCommand}"/>
+            <Button Content="Cancel" Command="{Binding CancelCommand}"/>
+        </StackPanel>
 
-        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-            <Setter Property="Background" Value="#E74C3C"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#C0392B"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
 
-        <Style x:Key="MenuItemStyle" TargetType="MenuItem">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-        </Style>
-
-        <!-- Pagination Button Style -->
-        <Style x:Key="btnNP" TargetType="Button">
-            <Setter Property="Width" Value="35"/>
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="Background" Value="#3498DB"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2980B9"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#BDC3C7"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Resources>
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- Menu Bar -->
-        <Grid Grid.Row="0">
-            <Menu Background="#21A366" Height="35">
-                <MenuItem Header="_File" Style="{StaticResource MenuItemStyle}">
-                    <MenuItem Header="_New" Foreground="Black" />
-                    <MenuItem Header="_Open" 
-                              Foreground="Black" 
-                              Command="{Binding OpenExcelCommand}"
-                              InputGestureText="Ctrl+O"/>
-                    <MenuItem Header="_Save" 
-                              Foreground="Black" 
-                              Command="{Binding SaveFileCommand}"
-                              IsEnabled="{Binding HasUnsavedChanges}"
-                              InputGestureText="Ctrl+S"/>
-                    <MenuItem Header="Save _As..." 
-                              Foreground="Black" 
-                              Command="{Binding ExportCommand}"/>
-                    <Separator/>
-                    <MenuItem Header="E_xit" Foreground="Black" />
-                </MenuItem>
-                <MenuItem Header="_Process" Style="{StaticResource MenuItemStyle}">
-                    <MenuItem Header="_Process Data" 
-                              Foreground="Black" 
-                              Command="{Binding ProcessDataCommand}"
-                              IsEnabled="{Binding CanExecuteCommands}"/>
-                    <MenuItem Header="_Cancel" 
-                              Foreground="Black" 
-                              Command="{Binding CancelCommand}"
-                              IsEnabled="{Binding IsProcessing}"/>
-                </MenuItem>
-                <MenuItem Header="_View" Style="{StaticResource MenuItemStyle}">
-                    <MenuItem Header="Page Size">
-                        <MenuItem Header="_100 rows" Tag="100" Foreground="Black"/>
-                        <MenuItem Header="_500 rows" Tag="500" Foreground="Black"/>
-                        <MenuItem Header="_1000 rows" Tag="1000" Foreground="Black"/>
-                        <MenuItem Header="_2000 rows" Tag="2000" Foreground="Black"/>
-                        <MenuItem Header="_5000 rows" Tag="5000" Foreground="Black"/>
-                    </MenuItem>
-                </MenuItem>
-            </Menu>
-        </Grid>
-
-        <!-- Tool Bar -->
-        <Border Grid.Row="1" Background="#ECF0F1" Padding="10">
-            <Grid>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button Content="📂 Open" 
-                            Style="{StaticResource PrimaryButton}"
-                            Command="{Binding OpenExcelCommand}"
-                            IsEnabled="{Binding CanExecuteCommands}"/>
-                    <Button Content="⚙️ Process" 
-                            Style="{StaticResource SuccessButton}"
-                            Command="{Binding ProcessDataCommand}"
-                            IsEnabled="{Binding CanExecuteCommands}"/>
-                    <Button Content="💾 Save" 
-                            Style="{StaticResource DangerButton}"
-                            Command="{Binding SaveFileCommand}"
-                            IsEnabled="{Binding HasUnsavedChanges}"/>
-                    <Button Content="📤 Export" 
-                            Style="{StaticResource PrimaryButton}"
-                            Command="{Binding ExportCommand}"
-                            IsEnabled="{Binding CanExecuteCommands}"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding CurrentFileName}" 
-                               FontWeight="Bold" FontSize="14"/>
-                    <TextBlock Text="{Binding StatusMessage}" 
-                               FontSize="12" Foreground="#7F8C8D"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- Main Content Area -->
-        <Grid Grid.Row="2" Margin="10">
+        <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Progress Panel -->
-            <Border Grid.Row="0" 
-                    Background="White" 
-                    BorderBrush="#BDC3C7" 
-                    BorderThickness="1" 
-                    CornerRadius="5"
-                    Padding="15"
-                    Margin="0,0,0,10"
-                    Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0">
-                        <TextBlock Text="{Binding ProgressText}" 
-                                   FontWeight="Bold" FontSize="14"
-                                   HorizontalAlignment="Left"/>
-                        <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}{0:F1}%'}" 
-                                   FontWeight="Bold" FontSize="14"
-                                   Foreground="#3498DB"
-                                   HorizontalAlignment="Right"/>
-                    </Grid>
-
-                    <ProgressBar Grid.Row="1" 
-                                 Height="25" 
-                                 Margin="0,10,0,5"
-                                 Value="{Binding ProgressPercentage}"
-                                 Background="#ECF0F1"
-                                 Foreground="#3498DB"
-                                 BorderThickness="1"
-                                 BorderBrush="#BDC3C7"/>
-
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="⏹️ Cancel" 
-                                Style="{StaticResource DangerButton}"
-                                Command="{Binding CancelCommand}"
-                                Width="100"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Data Grid Panel -->
-            <Border Grid.Row="1" 
-                    Background="White" 
-                    BorderBrush="#BDC3C7" 
-                    BorderThickness="1"
-                    CornerRadius="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Data Grid Header -->
-                    <Border Grid.Row="0" Background="#34495E" CornerRadius="5,5,0,0" Padding="10">
-                        <Grid>
-                            <TextBlock Text="📋 Data Preview" 
-                                       Foreground="White" 
-                                       FontWeight="Bold" 
-                                       FontSize="14"
-                                       HorizontalAlignment="Left"/>
-                            <TextBlock Text="{Binding RowRangeDisplayText}" 
-                                       Foreground="White" 
-                                       FontSize="12"
-                                       HorizontalAlignment="Right"/>
-                        </Grid>
-                    </Border>
-
-                    <!-- Data Grid -->
-                    <DataGrid Grid.Row="1"
-                              Background="Transparent"
-                              BorderBrush="Transparent" 
-                              BorderThickness="0"
-                              RowHeight="30"
-                              AlternatingRowBackground="#F8F9FA"
-                              AutoGenerateColumns="True" 
-                              EnableRowVirtualization="True"
-                              IsReadOnly="True" 
-                              VirtualizingPanel.IsVirtualizing="True" 
-                              VirtualizingPanel.VirtualizationMode="Recycling"
-                              ItemsSource="{Binding ExcelData}"
-                              FontSize="12"
-                              GridLinesVisibility="Horizontal"
-                              HeadersVisibility="Column"
-                              Margin="5">
-
-                        <DataGrid.Resources>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#3498DB"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="Padding" Value="8"/>
-                                <Setter Property="BorderThickness" Value="0,0,1,0"/>
-                                <Setter Property="BorderBrush" Value="White"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            </Style>
-
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="White"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#E8F4FD"/>
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="#D5DBDB"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="5"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Foreground" Value="Black"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.Resources>
-                    </DataGrid>
-
-                    <!-- No Data Overlay -->
-                    <Border Grid.Row="1" 
-                            Background="White" 
-                            Visibility="{Binding ShowNoDataMessage, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <TextBlock Text="📄" 
-                                       FontSize="72" 
-                                       HorizontalAlignment="Center" 
-                                       Foreground="#BDC3C7"
-                                       Margin="0,0,0,20"/>
-                            <TextBlock Text="No data loaded yet" 
-                                       FontSize="18" 
-                                       FontWeight="Bold"
-                                       Foreground="#7F8C8D" 
-                                       HorizontalAlignment="Center"/>
-                            <TextBlock Text="Click 'Open' to load an Excel file" 
-                                       FontSize="14" 
-                                       Foreground="#95A5A6" 
-                                       HorizontalAlignment="Center"
-                                       Margin="0,10,0,0"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </Border>
-        </Grid>
-
-        <!-- Status Bar -->
-        <Grid Grid.Row="3"
-              Background="#2C3E50" 
-              Height="40">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Left Status Info -->
-            <StackPanel Grid.Column="0" 
-                        Orientation="Horizontal" 
-                        VerticalAlignment="Center"
-                        Margin="15,0">
-                <TextBlock Text="Total Rows:" 
-                           Foreground="White" 
-                           FontWeight="Bold"
-                           Margin="0,0,5,0"/>
-                <TextBlock Text="{Binding RowCount, 
-                            StringFormat='{}{0:N0}'}" 
-                           Foreground="#E74C3C" 
-                           FontWeight="Bold"
-                           Margin="0,0,20,0"/>
-
-                <TextBlock Text="Memory:" 
-                           Foreground="White" 
-                           FontWeight="Bold"
-                           Margin="0,0,5,0"/>
-                <TextBlock Text="{Binding MemoryUsage}" 
-                           Foreground="#F39C12" 
-                           FontWeight="Bold"/>
+            <!-- Filter/Search (đẩy xuống SQLite) -->
+            <StackPanel Orientation="Horizontal" >
+                <TextBox Width="180"  Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="Apply" Command="{Binding ApplyFilterCommand}"/>
             </StackPanel>
 
-            <!-- Pagination Controls -->
-            <StackPanel Grid.Column="1" 
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center"
-                        Margin="10,0">
 
-                <!-- Page Size Selector -->
-                <TextBlock Text="Page Size:" 
-                           Foreground="White" 
-                           VerticalAlignment="Center"
-                           Margin="0,0,5,0"/>
-                <ComboBox Width="80" 
-                          Height="25"
-                          SelectedValue="{Binding PageSize}"
-                          VerticalAlignment="Center"
-                          Margin="0,0,20,0">
-                    <ComboBoxItem Content="100"/>
-                    <ComboBoxItem Content="500"/>
-                    <ComboBoxItem Content="1000"/>
-                    <ComboBoxItem Content="2000"/>
-                    <ComboBoxItem Content="5000"/>
-                </ComboBox>
+            <!-- DataGrid phân trang + ảo hoá -->
+            <DataGrid Grid.Row="1"
+                        ItemsSource="{Binding CurrentPageItems}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        IsReadOnly="False"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.ScrollChanged="{Binding OnScrollChanged}" >
+                <!-- TODO: Khai báo cột cụ thể theo schema của bạn -->
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="#" Binding="{Binding RowNumber}" Width="60" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="ColA" Binding="{Binding ColA}"/>
+                    <DataGridTextColumn Header="ColB" Binding="{Binding ColB}"/>
+                    <!-- ... -->
+                </DataGrid.Columns>
+            </DataGrid>
 
-                <!-- Navigation Buttons -->
-                <Button Style="{StaticResource btnNP}"
-                        Command="{Binding FirstPageCommand}"
-                        ToolTip="First Page"
-                        Margin="2">
-                    <TextBlock Text="⏮️" FontSize="16"/>
-                </Button>
 
-                <Button Style="{StaticResource btnNP}"
-                        Command="{Binding PreviousPageCommand}"
-                        ToolTip="Previous Page"
-                        Margin="2">
-                    <TextBlock Text="⏪" FontSize="16"/>
-                </Button>
-
-                <TextBlock Foreground="White" 
-                           FontWeight="Bold"
-                           FontSize="14"
-                           VerticalAlignment="Center"
-                           Margin="10,0">
-                    <Run Text="{Binding PageDisplayText}"/>
-                </TextBlock>
-
-                <Button Style="{StaticResource btnNP}"
-                        Command="{Binding NextPageCommand}"
-                        ToolTip="Next Page"
-                        Margin="2">
-                    <TextBlock Text="⏩" FontSize="16"/>
-                </Button>
-
-                <Button Style="{StaticResource btnNP}"
-                        Command="{Binding LastPageCommand}"
-                        ToolTip="Last Page"
-                        Margin="2">
-                    <TextBlock Text="⏭️" FontSize="16"/>
-                </Button>
-            </StackPanel>
-
-            <!-- Processing Status -->
-            <StackPanel Grid.Column="2" 
-                        Orientation="Horizontal"
-                        VerticalAlignment="Center"
-                        Margin="15,0">
-
-                <!-- Processing Indicator -->
-                <Border Background="#E74C3C" 
-                        CornerRadius="10"
-                        Padding="8,4"
-                        Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVisibilityConverter}}"
-                        Margin="0,0,10,0">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⚡" 
-                                   Foreground="White" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,5,0"/>
-                        <TextBlock Text="Processing..." 
-                                   Foreground="White" 
-                                   FontWeight="Bold"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Ready Indicator -->
-                <Border Background="#27AE60" 
-                        CornerRadius="10"
-                        Padding="8,4"
-                        Visibility="{Binding CanExecuteCommands, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="✅" 
-                                   Foreground="White" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,5,0"/>
-                        <TextBlock Text="Ready" 
-                                   Foreground="White" 
-                                   FontWeight="Bold"/>
-                    </StackPanel>
-                </Border>
+            <!-- Paging -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                        HorizontalAlignment="Right"  Margin="0,8,0,0">
+                <TextBlock Text="Page:" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding PageIndex}" VerticalAlignment="Center"/>
+                <Button Content="Prev" Command="{Binding PrevPageCommand}"/>
+                <Button Content="Next" Command="{Binding NextPageCommand}"/>
+                <TextBlock Text="/"/>
+                <TextBlock Text="{Binding TotalPages}"/>
             </StackPanel>
         </Grid>
-    </Grid>
+    </DockPanel>
 </Window>

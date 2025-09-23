@@ -1,7 +1,7 @@
 ﻿using OfficeOpenXml;
 using System.Data;
-using System; 
-using System.IO; 
+using System;
+using System.IO;
 using Newtonsoft.Json;
 namespace Test01
 {
@@ -10,7 +10,7 @@ namespace Test01
         static void Main(string[] args)
         {
             ExcelPackage.License.SetNonCommercialPersonal("Nguyen Truong");
-            
+
 
             var filePath = "DuLieuExcel.xlsx";
 
@@ -22,7 +22,6 @@ namespace Test01
             Console.WriteLine("--- Bắt đầu quá trình ĐỌC file Excel ---");
             Console.WriteLine("Vui lòng tạo file 'TestDataRead.xlsx' với dữ liệu mẫu để chương trình có thể đọc.");
 
-            // Kiểm tra xem file đọc có tồn tại không
             if (File.Exists(filePath))
             {
                 var userDetails = ReadFromExcel<List<UserDetails>>(filePath);
@@ -56,11 +55,11 @@ namespace Test01
             // Chuyển danh sách đối tượng thành DataTable để dễ xử lý
             DataTable table = (DataTable)JsonConvert.DeserializeObject(JsonConvert.SerializeObject(persons), (typeof(DataTable)));
 
-            if(File.Exists(path))
+            if (File.Exists(path))
             {
                 File.Delete(path);
-            }    
-            FileInfo filePath = new FileInfo(path); 
+            }
+            FileInfo filePath = new FileInfo(path);
             using (var excelPack = new ExcelPackage(filePath))
             {
                 var ws = excelPack.Workbook.Worksheets.Add("WriteTest");
@@ -73,7 +72,7 @@ namespace Test01
 
         private static T ReadFromExcel<T>(string path, bool hasHeader = true)
         {
-           
+
             using (var excelPack = new ExcelPackage())
             {
                 //Load excel stream
@@ -82,10 +81,8 @@ namespace Test01
                     excelPack.Load(stream);
                 }
 
-                //Lets Deal with first worksheet.(You may iterate here if dealing with multiple sheets)
                 var ws = excelPack.Workbook.Worksheets[0];
-                Console.WriteLine("ws :" +ws );
-                //Get all details as DataTable -because Datatable make life easy :)
+                Console.WriteLine("ws :" + ws);
                 DataTable excelasTable = new DataTable();
                 foreach (var firstRowCell in ws.Cells[1, 1, 1, ws.Dimension.End.Column])
                 {
@@ -98,7 +95,7 @@ namespace Test01
                     }
                 }
                 var startRow = hasHeader ? 2 : 1;
-                Console.WriteLine("start Row :" + startRow );
+                Console.WriteLine("start Row :" + startRow);
                 //Get row details
                 for (int rowNum = startRow; rowNum <= ws.Dimension.End.Row; rowNum++)
                 {
@@ -109,7 +106,6 @@ namespace Test01
                         row[cell.Start.Column - 1] = cell.Text;
                     }
                 }
-                //Get everything as generics and let end user decides on casting to required type
                 var generatedType = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(excelasTable));
 
                 return (T)Convert.ChangeType(generatedType, typeof(T));

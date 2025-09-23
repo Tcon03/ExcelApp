@@ -13,7 +13,7 @@ namespace ExcelAppCR.ViewModel
     public abstract class PaggingVM : ViewModelBase
     {
         #region
-        private int _pageSize = 1000;
+        private int _pageSize = 20;
         public int PageSize
         {
             get { return _pageSize; }
@@ -54,8 +54,6 @@ namespace ExcelAppCR.ViewModel
                     _pageIndex = value;
                     Log.Information("Page Index Changed : {PageIndex}", _pageIndex);
                     RaisePropertyChanged(nameof(PageIndex));
-                    LoadPageData();
-                    RefreshPaging();
                 }
             }
         }
@@ -105,9 +103,11 @@ namespace ExcelAppCR.ViewModel
 
         public PaggingVM()
         {
-            NextPageCommand = new VfxCommand(OnNextPage, CanGoNextPage);
+            NextPageCommand = new VfxCommand( OnNextPage, CanGoNextPage);
             PreviousPageCommand = new VfxCommand(OnPreviousPage, CanGoPreviousPage);
         }
+
+
 
         public bool CanGoPreviousPage()
         {
@@ -116,11 +116,11 @@ namespace ExcelAppCR.ViewModel
             return false;
         }
 
-        public void OnPreviousPage(object obj)
+        public virtual void OnPreviousPage(object obj)
         {
-            if (PageIndex > 1)
+            //if (PageIndex > 1)
                 PageIndex--;
-            Log.Information("Navigated to Previous Page: {PageIndex}", PageIndex);
+            //Log.Information("Navigated to Previous Page: {PageIndex}", PageIndex);
         }
 
         public bool CanGoNextPage()
@@ -130,11 +130,11 @@ namespace ExcelAppCR.ViewModel
             return false;
         }
 
-        public void OnNextPage(object obj)
+        public virtual void OnNextPage(object obj)
         {
-            if (PageIndex < TotalPages)
+            //if (PageIndex < TotalPages)
                 PageIndex++;
-            Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
+            //Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
         }
 
         
@@ -146,6 +146,5 @@ namespace ExcelAppCR.ViewModel
 
         public ICommand NextPageCommand { get; set; }
         public ICommand PreviousPageCommand { get; set; }
-        protected abstract Task LoadPageData();
     }
 }
