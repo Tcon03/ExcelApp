@@ -18,10 +18,11 @@ namespace ExcelAppCR.Converters
                 // Nếu là true , trả về Visible
                 return Visibility.Visible;
 
-
             }
             // Ngược lại trả về Collapsed
             return Visibility.Collapsed;
+
+
 
 
         }

@@ -15,10 +15,7 @@ namespace ExcelAppCR.Service
 {
     public class ExcelService
     {
-        public ExcelService()
-        {
-            ExcelPackage.License.SetNonCommercialPersonal("Nguyen Truong");
-        }
+
 
 
 
@@ -84,7 +81,10 @@ namespace ExcelAppCR.Service
 
 
 
-
+        public ExcelService()
+        {
+            ExcelPackage.License.SetNonCommercialPersonal("Nguyen Truong");
+        }
         /// <summary>
         /// Load file Excel theo trang (pagination)
         /// </summary>
@@ -107,26 +107,26 @@ namespace ExcelAppCR.Service
                 using (var package = new ExcelPackage(fileInfo))
                 {
                     // 3.1 mở file excel và lấy ra sheet đầu tiên
-                    var worksheet = package.Workbook.Worksheets[0];
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
                     Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
 
                     //3.2 kiểm tra file excel có dữ liệu hay không nếu kh thì trả về dataTable rỗng
                     if (worksheet.Dimension == null)
                         return dataTable;
 
-                    //3.3 lấy ra tổng số dòng và cột trong file excel
-                    var totalRows = worksheet.Dimension.Rows; // đếm xem có bao nhiêu dòng trong file excel
+                    //3.3 đếm xem có bao nhiêu dòng trong file excel
+                    var totalRows = worksheet.Dimension.Rows;
                     Log.Information("Total Rows in Excel ......: {TotalRows}", totalRows);
 
                     //3.4 Đếm xem có bao nhiêu cột trong file excel
-                    var colCount = worksheet.Dimension.Columns;
-                    Log.Information("Total Columns in Excel: {ColCount}", colCount);
+                    var totalCol = worksheet.Dimension.Columns;
+                    Log.Information("Total Columns in Excel: {ColCount}", totalCol);
 
 
                     // 3.5 nhìn vào cột đầu tiên và tạo các column tương ứng trong dataTable
-                    for (int col = 1; col <= colCount; col++)
+                    for (int colI = 1; colI <= totalCol; colI++)
                     {
-                        dataTable.Columns.Add(worksheet.Cells[1, col].Value?.ToString() ?? $"Col{col}");
+                        dataTable.Columns.Add(worksheet.Cells[1, colI].Value?.ToString() ?? $"Col{colI}");
                     }
 
                     // Vì dòng 1 của Excel là dòng tiêu đề, nên dữ liệu thực tế bắt đầu từ dòng 2.Vậy nên, dòng dữ liệu thứ 10 sẽ
@@ -145,7 +145,7 @@ namespace ExcelAppCR.Service
                         Log.Information("Reading Row: {Row}", row);
 
                         // lắp qua all các cột 
-                        for (int col = 1; col <= colCount; col++)
+                        for (int col = 1; col <= totalCol; col++)
                         {
                             dataRow[col - 1] = worksheet.Cells[row, col].Value;
                         }
@@ -167,7 +167,7 @@ namespace ExcelAppCR.Service
             Log.Information("Getting total row count from file: {FilePath}", filePath);
             using (var package = new ExcelPackage(fileInfo))
             {
-                var worksheet = package.Workbook.Worksheets[0];
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
                 Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
                 if (worksheet.Dimension == null)
                     return 0;
@@ -176,6 +176,24 @@ namespace ExcelAppCR.Service
                 return totalRows;
             }
         }
+        public async Task SaveToFile(DataTable dataTable, string filePath)
+        {
+            await Task.Run(() =>
+            {
+                var info = new FileInfo(filePath);
+                using (var package = new ExcelPackage(filePath))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Processed Dataa");
 
+                    // Ghi dữ liệu từ DataTable vào worksheet, bao gồm cả header
+                    // Tham số 'true' đầu tiên có nghĩa là 'PrintHeaders'
+                    worksheet.Cells["A1"].LoadFromDataTable(dataTable,true);
+
+                    // Tự động căn chỉnh lại độ rộng các cột cho đẹp
+                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+                    package.Save();
+                }
+            });
+        }
     }
 }

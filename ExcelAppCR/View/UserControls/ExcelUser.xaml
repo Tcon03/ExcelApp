@@ -31,29 +31,31 @@
                         AlternatingRowBackground="#F8F9FA"
                         AutoGenerateColumns="True" 
                         EnableRowVirtualization="True"
-                        IsReadOnly="True" 
+                        IsReadOnly="False" 
                         VirtualizingPanel.IsVirtualizing="True" 
                         VirtualizingPanel.VirtualizationMode="Recycling"
                         ItemsSource="{Binding ExcelData}"
                         Margin="5">
                 </DataGrid>
             </Border>
-            <Border Grid.Row="1"
+            <!--<Border Grid.Row="1"
                     Background="White" 
-                    Visibility="{Binding IsProcessing,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource BoolVisibili}}">
+                    Visibility="{Binding IsProcessing,
+                    Converter={StaticResource BoolVisibili}}">
                 <StackPanel VerticalAlignment="Center" 
-                            HorizontalAlignment="Center">
-                    <TextBlock Text="📄" FontSize="48" 
+                           HorizontalAlignment="Center">
+                    <TextBlock Text="📄" 
+                               FontSize="48" 
                                HorizontalAlignment="Center" 
                                Foreground="#BDC3C7"/>
                     <TextBlock Text="No data loaded yet" 
-                               FontSize="16"
-                               Foreground="#7F8C8D" 
-                               HorizontalAlignment="Center" 
-                               Margin="0,10,0,0"/>
-                    
+                                FontSize="16"
+                                Foreground="#7F8C8D" 
+                                HorizontalAlignment="Center" 
+                                Margin="0,10,0,0"/>
+
                 </StackPanel>
-            </Border>
+            </Border>-->
         </Grid>
 
         <Grid Grid.Row="1">
@@ -77,14 +79,14 @@
                             VerticalAlignment="Center"
                             Margin="0,0,10,0"/>
 
-                <ProgressBar Height="20" 
+                <!--<ProgressBar Height="20" 
                              Margin="0 0 50 0" 
                              VerticalAlignment="Center"
                              Foreground="Green"
                              IsIndeterminate="True"
                              Value="{Binding IsProcessing ,Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
                              Background="Azure"
-                             Width="200"/>
+                             Width="200"/>-->
                 <TextBlock Text="Page Size :" 
                            FontSize="18"
                            FontWeight="Bold"
