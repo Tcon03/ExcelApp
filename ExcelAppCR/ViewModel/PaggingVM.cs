@@ -13,7 +13,7 @@ namespace ExcelAppCR.ViewModel
     public abstract class PaggingVM : ViewModelBase
     {
         #region
-        private int _pageSize = 20;
+        private int _pageSize = 2000;
         public int PageSize
         {
             get { return _pageSize; }

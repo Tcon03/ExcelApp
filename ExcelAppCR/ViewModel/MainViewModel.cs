@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
@@ -37,6 +38,8 @@ namespace ExcelAppCR.ViewModel
         }
 
         public bool HasData => ExcelData != null && ExcelData.Count > 0;
+
+
         public MainViewModel()
         {
             InitData();
@@ -112,21 +115,23 @@ namespace ExcelAppCR.ViewModel
                 MessageBox.Show("Không có dữ liệu để lưu.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            SaveFileDialog saveFile = new SaveFileDialog
-            {
-                Title = "Save Excel File",
-                Filter = "Excel Files|*.xlsx",
-                DefaultExt = ".xlsx",
-                FileName = _filePath
-            };
-            if (saveFile.ShowDialog() != true)
-                return;
+
+            //SaveFileDialog saveFile = new SaveFileDialog
+            //{
+            //    Title = "Save Excel File",
+            //    Filter = "Excel Files|*.xlsx",
+            //    DefaultExt = ".xlsx",
+            //    FileName = _filePath
+            //};
+            //Log.Information("File Path : " + saveFile.FileName);
+            //if (saveFile.ShowDialog() != true)
+            //    return;
             try
             {
-                DataTable saveDataa = ExcelData.Table;
-                string path = saveFile.FileName;
-                await _excelService.SaveToFile(saveDataa , path);
-                MessageBox.Show($"File saved successfully to:\n{path}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                DataTable saveDataTable = ExcelData.Table;
+                //string path = saveFile.FileName;
+                await _excelService.SaveToFile(saveDataTable, _filePath);
+                MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -178,6 +183,7 @@ namespace ExcelAppCR.ViewModel
         {
             if (string.IsNullOrEmpty(_filePath))
                 return;
+
 
             try
             {

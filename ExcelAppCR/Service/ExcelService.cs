@@ -16,75 +16,11 @@ namespace ExcelAppCR.Service
     public class ExcelService
     {
 
-
-
-
-        /// <summary>
-        /// Load dữ liệu từ file Excel
-        /// </summary>
-        /// <param name="filePath">Đường dẫn file Excel</param>
-        /// <returns>DataTable chứa dữ liệu</returns>
-        //public async Task<DataTable> LoadExcelDataAsync(string filePath)
-        //{
-        //    return await Task.Run(() =>
-        //    {
-        //        var dataTable = new DataTable();
-
-        //        using (var package = new ExcelPackage(new FileInfo(filePath)))
-        //        {
-        //            if (package.Workbook.Worksheets.Count == 0)
-        //                throw new InvalidOperationException("File Excel không có worksheet nào.");
-
-        //            var worksheet = package.Workbook.Worksheets[0];
-
-
-        //            if (worksheet.Dimension == null)
-        //                return dataTable; // Trả về DataTable rỗng nếu không có dữ liệu
-
-        //            var start = worksheet.Dimension.Start;
-        //            var end = worksheet.Dimension.End;
-
-        //            // Tạo columns từ hàng đầu tiên (header)
-        //            for (int col = start.Column; col <= end.Column; col++)
-        //            {
-        //                var headerValue = worksheet.Cells[start.Row, col].Value?.ToString();
-        //                if (string.IsNullOrWhiteSpace(headerValue))
-        //                    headerValue = $"Column{col}";
-
-        //                dataTable.Columns.Add(headerValue);
-        //            }
-
-        //            // Đọc dữ liệu từ hàng thứ 2
-        //            for (int row = start.Row + 1; row <= end.Row; row++)
-        //            {
-        //                var dataRow = dataTable.NewRow();
-        //                bool hasData = false;
-
-        //                for (int col = start.Column; col <= end.Column; col++)
-        //                {
-        //                    var cellValue = worksheet.Cells[row, col].Value;
-        //                    dataRow[col - start.Column] = cellValue?.ToString() ?? string.Empty;
-
-        //                    if (cellValue != null && !string.IsNullOrWhiteSpace(cellValue.ToString()))
-        //                        hasData = true;
-        //                }
-
-        //                // Chỉ thêm row nếu có dữ liệu
-        //                if (hasData)
-        //                    dataTable.Rows.Add(dataRow);
-        //            }
-        //        }
-        //        return dataTable;
-        //    });
-        //}
-
-
-
-
         public ExcelService()
         {
             ExcelPackage.License.SetNonCommercialPersonal("Nguyen Truong");
         }
+
         /// <summary>
         /// Load file Excel theo trang (pagination)
         /// </summary>
@@ -180,19 +116,65 @@ namespace ExcelAppCR.Service
         {
             await Task.Run(() =>
             {
-                var info = new FileInfo(filePath);
-                using (var package = new ExcelPackage(filePath))
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+
+                // Tạo file tạm để backup
+                string tempFile = filePath + ".temp";
+
+                // Copy file gốc sang file tạm
+                File.Copy(filePath, tempFile, true);
+
+                try
                 {
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Processed Dataa");
 
-                    // Ghi dữ liệu từ DataTable vào worksheet, bao gồm cả header
-                    // Tham số 'true' đầu tiên có nghĩa là 'PrintHeaders'
-                    worksheet.Cells["A1"].LoadFromDataTable(dataTable,true);
+                    using (var package = new ExcelPackage(new FileInfo(filePath)))
+                    {
+                        // Tạo worksheet mới
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Data");
 
-                    // Tự động căn chỉnh lại độ rộng các cột cho đẹp
-                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                    package.Save();
+                        // Ghi header (tên cột)
+                        for (int col = 0; col < dataTable.Columns.Count; col++)
+                        {
+                            worksheet.Cells[1, col + 1].Value = dataTable.Columns[col].ColumnName;
+                        }
+
+                        // Ghi dữ liệu
+                        for (int row = 0; row < dataTable.Rows.Count; row++)
+                        {
+                            for (int col = 0; col < dataTable.Columns.Count; col++)
+                            {
+                                worksheet.Cells[row + 2, col + 1].Value = dataTable.Rows[row][col];
+                            }
+                        }
+
+                        // Tự động điều chỉnh độ rộng cột
+                        worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                        // Lưu file
+                        package.Save();
+                    }
                 }
+
+                catch (Exception ex)
+                {
+                    Log.Error("Error saving to Excel file: {Message}", ex.Message);
+                    // Nếu có lỗi xảy ra, khôi phục lại file gốc từ file tạm
+                    if (File.Exists(tempFile))
+                    {
+                        File.Copy(tempFile, filePath, true);
+                    }
+
+                }
+                finally
+                {
+                    // Xóa file tạm sau khi hoàn thành (bất kể thành công hay thất bại)
+                    if (File.Exists(tempFile))
+                    {
+                        File.Delete(tempFile);
+                    }
+                }
+
             });
         }
     }
