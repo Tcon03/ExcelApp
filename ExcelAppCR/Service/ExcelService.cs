@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -80,7 +81,7 @@ namespace ExcelAppCR.Service
                         var dataRow = dataTable.NewRow();
                         Log.Information("Reading Row: {Row}", row);
 
-                        // lắp qua all các cột 
+                        // lặp qua all các cột 
                         for (int col = 1; col <= totalCol; col++)
                         {
                             dataRow[col - 1] = worksheet.Cells[row, col].Value;
@@ -112,66 +113,55 @@ namespace ExcelAppCR.Service
                 return totalRows;
             }
         }
-        public async Task SaveToFile(DataTable dataTable, string filePath)
+        public async Task SaveToFile(string filePath, List<ExcelFileInfo> changes)
         {
             await Task.Run(() =>
             {
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
 
-                // Tạo file tạm để backup
-                string tempFile = filePath + ".temp";
+                var fileInfo = new FileInfo(filePath);
+                Log.Information("Name FilePath: {FilePath}", filePath);
 
-                // Copy file gốc sang file tạm
-                File.Copy(filePath, tempFile, true);
+                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".xlsx");
+                Log.Information("Temp FilePath: {TempFilePath}", tempFilePath);
+
+                var tempFileInfo = new FileInfo(tempFilePath);
+                Log.Information("Name Temp FilePath: {TempFilePath}", tempFileInfo);
+
+                // 1. Sao chép file gốc sang file tạm
 
                 try
                 {
+                    // sao chép file gốc sang file tạm 
+                    fileInfo.CopyTo(tempFileInfo.FullName, true);
 
-                    using (var package = new ExcelPackage(new FileInfo(filePath)))
+                    // 2. Mở file tạm và áp dụng các thay đổi
+                    using (var package = new ExcelPackage(tempFileInfo))
                     {
-                        // Tạo worksheet mới
-                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Data");
+                        var worksheet = package.Workbook.Worksheets[0];
 
-                        // Ghi header (tên cột)
-                        for (int col = 0; col < dataTable.Columns.Count; col++)
+                        foreach (var change in changes)
                         {
-                            worksheet.Cells[1, col + 1].Value = dataTable.Columns[col].ColumnName;
+                            worksheet.Cells[change.RowIndex, change.ColumnIndex].Value = change.NewValue;
                         }
-
-                        // Ghi dữ liệu
-                        for (int row = 0; row < dataTable.Rows.Count; row++)
-                        {
-                            for (int col = 0; col < dataTable.Columns.Count; col++)
-                            {
-                                worksheet.Cells[row + 2, col + 1].Value = dataTable.Rows[row][col];
-                            }
-                        }
-
-                        // Tự động điều chỉnh độ rộng cột
-                        worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-
-                        // Lưu file
                         package.Save();
                     }
+                    //ghì đè file tạm lên file gốc
+                    tempFileInfo.CopyTo(fileInfo.FullName, true);
+
                 }
+
 
                 catch (Exception ex)
                 {
                     Log.Error("Error saving to Excel file: {Message}", ex.Message);
-                    // Nếu có lỗi xảy ra, khôi phục lại file gốc từ file tạm
-                    if (File.Exists(tempFile))
-                    {
-                        File.Copy(tempFile, filePath, true);
-                    }
+
 
                 }
                 finally
                 {
-                    // Xóa file tạm sau khi hoàn thành (bất kể thành công hay thất bại)
-                    if (File.Exists(tempFile))
+                    if (tempFileInfo.Exists)
                     {
-                        File.Delete(tempFile);
+                        tempFileInfo.Delete();
                     }
                 }
 
