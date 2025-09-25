@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,75 +17,11 @@ namespace ExcelAppCR.Service
     public class ExcelService
     {
 
-
-
-
-        /// <summary>
-        /// Load dữ liệu từ file Excel
-        /// </summary>
-        /// <param name="filePath">Đường dẫn file Excel</param>
-        /// <returns>DataTable chứa dữ liệu</returns>
-        //public async Task<DataTable> LoadExcelDataAsync(string filePath)
-        //{
-        //    return await Task.Run(() =>
-        //    {
-        //        var dataTable = new DataTable();
-
-        //        using (var package = new ExcelPackage(new FileInfo(filePath)))
-        //        {
-        //            if (package.Workbook.Worksheets.Count == 0)
-        //                throw new InvalidOperationException("File Excel không có worksheet nào.");
-
-        //            var worksheet = package.Workbook.Worksheets[0];
-
-
-        //            if (worksheet.Dimension == null)
-        //                return dataTable; // Trả về DataTable rỗng nếu không có dữ liệu
-
-        //            var start = worksheet.Dimension.Start;
-        //            var end = worksheet.Dimension.End;
-
-        //            // Tạo columns từ hàng đầu tiên (header)
-        //            for (int col = start.Column; col <= end.Column; col++)
-        //            {
-        //                var headerValue = worksheet.Cells[start.Row, col].Value?.ToString();
-        //                if (string.IsNullOrWhiteSpace(headerValue))
-        //                    headerValue = $"Column{col}";
-
-        //                dataTable.Columns.Add(headerValue);
-        //            }
-
-        //            // Đọc dữ liệu từ hàng thứ 2
-        //            for (int row = start.Row + 1; row <= end.Row; row++)
-        //            {
-        //                var dataRow = dataTable.NewRow();
-        //                bool hasData = false;
-
-        //                for (int col = start.Column; col <= end.Column; col++)
-        //                {
-        //                    var cellValue = worksheet.Cells[row, col].Value;
-        //                    dataRow[col - start.Column] = cellValue?.ToString() ?? string.Empty;
-
-        //                    if (cellValue != null && !string.IsNullOrWhiteSpace(cellValue.ToString()))
-        //                        hasData = true;
-        //                }
-
-        //                // Chỉ thêm row nếu có dữ liệu
-        //                if (hasData)
-        //                    dataTable.Rows.Add(dataRow);
-        //            }
-        //        }
-        //        return dataTable;
-        //    });
-        //}
-
-
-
-
         public ExcelService()
         {
             ExcelPackage.License.SetNonCommercialPersonal("Nguyen Truong");
         }
+
         /// <summary>
         /// Load file Excel theo trang (pagination)
         /// </summary>
@@ -144,7 +81,7 @@ namespace ExcelAppCR.Service
                         var dataRow = dataTable.NewRow();
                         Log.Information("Reading Row: {Row}", row);
 
-                        // lắp qua all các cột 
+                        // lặp qua all các cột 
                         for (int col = 1; col <= totalCol; col++)
                         {
                             dataRow[col - 1] = worksheet.Cells[row, col].Value;
@@ -176,23 +113,58 @@ namespace ExcelAppCR.Service
                 return totalRows;
             }
         }
-        public async Task SaveToFile(DataTable dataTable, string filePath)
+        public async Task SaveToFile(string filePath, List<ExcelFileInfo> changes)
         {
             await Task.Run(() =>
             {
-                var info = new FileInfo(filePath);
-                using (var package = new ExcelPackage(filePath))
+
+                var fileInfo = new FileInfo(filePath);
+                Log.Information("Name FilePath: {FilePath}", filePath);
+
+                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".xlsx");
+                Log.Information("Temp FilePath: {TempFilePath}", tempFilePath);
+
+                var tempFileInfo = new FileInfo(tempFilePath);
+                Log.Information("Name Temp FilePath: {TempFilePath}", tempFileInfo);
+
+                // 1. Sao chép file gốc sang file tạm
+
+                try
                 {
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Processed Dataa");
+                    // sao chép file gốc sang file tạm 
+                    fileInfo.CopyTo(tempFileInfo.FullName, true);
 
-                    // Ghi dữ liệu từ DataTable vào worksheet, bao gồm cả header
-                    // Tham số 'true' đầu tiên có nghĩa là 'PrintHeaders'
-                    worksheet.Cells["A1"].LoadFromDataTable(dataTable,true);
+                    // 2. Mở file tạm và áp dụng các thay đổi
+                    using (var package = new ExcelPackage(tempFileInfo))
+                    {
+                        var worksheet = package.Workbook.Worksheets[0];
 
-                    // Tự động căn chỉnh lại độ rộng các cột cho đẹp
-                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                    package.Save();
+                        foreach (var change in changes)
+                        {
+                            worksheet.Cells[change.RowIndex, change.ColumnIndex].Value = change.NewValue;
+                        }
+                        package.Save();
+                    }
+                    //ghì đè file tạm lên file gốc
+                    tempFileInfo.CopyTo(fileInfo.FullName, true);
+
                 }
+
+
+                catch (Exception ex)
+                {
+                    Log.Error("Error saving to Excel file: {Message}", ex.Message);
+
+
+                }
+                finally
+                {
+                    if (tempFileInfo.Exists)
+                    {
+                        tempFileInfo.Delete();
+                    }
+                }
+
             });
         }
     }

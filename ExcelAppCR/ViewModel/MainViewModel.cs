@@ -1,9 +1,11 @@
 ﻿using ExcelAppCR.Commands;
+using ExcelAppCR.Model;
 using ExcelAppCR.Service;
 using Microsoft.Win32;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
@@ -13,6 +15,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 
@@ -21,7 +24,7 @@ namespace ExcelAppCR.ViewModel
     public class MainViewModel : PaggingVM
     {
 
-        string _filePath;
+        private string _filePath;
 
         private DataView _dataView;
         public DataView ExcelData
@@ -29,14 +32,30 @@ namespace ExcelAppCR.ViewModel
             get { return _dataView; }
             set
             {
+                if (_dataView?.Table != null)
+                {
+                    _dataView.Table.ColumnChanged -= OnCellChanged;
+                }
                 _dataView = value;
-                Log.Information("ExcelData set. Rows={Rows}, Columns={Cols}");
+
+                if (_dataView?.Table != null)
+                {
+                    _dataView.Table.ColumnChanged += OnCellChanged;
+                }
 
                 RaisePropertyChanged(nameof(ExcelData));
+                RaisePropertyChanged(nameof(HasData));
             }
         }
 
         public bool HasData => ExcelData != null && ExcelData.Count > 0;
+
+        // Dùng để lưu trữ thay đổi trên các trang
+        private List<ExcelFileInfo> _modifiedCells = new List<ExcelFileInfo>();
+
+        // lưu lại các trang đã được tải để dùng lại khi  chuyển trang
+
+        private Dictionary<int, DataTable> _pageCache = new Dictionary<int, DataTable>();
         public MainViewModel()
         {
             InitData();
@@ -53,7 +72,6 @@ namespace ExcelAppCR.ViewModel
             OpenExcelCommand = new VfxCommand(OnOpen, () => true);
             SaveFileCommand = new VfxCommand(OnSave, () => true);
             NewFile = new VfxCommand(OnNewFile, () => true);
-
         }
 
         private void OnNewFile(object obj)
@@ -104,35 +122,64 @@ namespace ExcelAppCR.ViewModel
         }
 
 
-
+        private async void OnSaveAs(object obj)
+        {
+            //SaveFileDialog saveFile = new SaveFileDialog
+            //{
+            //    Title = "Save Excel File",
+            //    Filter = "Excel Files|*.xlsx",
+            //    DefaultExt = ".xlsx",
+            //    FileName = _filePath
+            //};
+            //Log.Information("File Path : " + saveFile.FileName);
+            //if (saveFile.ShowDialog() != true)
+            //    return;
+            //string path = saveFile.FileName;
+        }
         private async void OnSave(object obj)
         {
-            if (ExcelData == null || ExcelData.Count == 0)
-            {
-                MessageBox.Show("Không có dữ liệu để lưu.", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-            SaveFileDialog saveFile = new SaveFileDialog
-            {
-                Title = "Save Excel File",
-                Filter = "Excel Files|*.xlsx",
-                DefaultExt = ".xlsx",
-                FileName = _filePath
-            };
-            if (saveFile.ShowDialog() != true)
-                return;
+
+
+
             try
             {
-                DataTable saveDataa = ExcelData.Table;
-                string path = saveFile.FileName;
-                await _excelService.SaveToFile(saveDataa , path);
-                MessageBox.Show($"File saved successfully to:\n{path}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                await _excelService.SaveToFile(_filePath, _modifiedCells);
+                _modifiedCells.Clear();
+                _pageCache.Clear();
+                MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadPageData();
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi save ! ", "Errorr", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+        }
+
+
+
+        private void OnCellChanged(object sender, DataColumnChangeEventArgs e)
+        {
+            var rowIndexOnPage = e.Row.Table.Rows.IndexOf(e.Row);
+            Log.Information("Row Index On Page: {RowIndexOnPage}", rowIndexOnPage);
+            var absoluteRowIndex = ((PageIndex - 1) * PageSize) + rowIndexOnPage + 2; 
+            Log.Information("Absolute Row Index: {AbsoluteRowIndex}", absoluteRowIndex);
+            var columnIndex = e.Column.Ordinal + 1; 
+            Log.Information("Column Index: {ColumnIndex}", columnIndex);
+
+               var change = new ExcelFileInfo
+            {
+                RowIndex = absoluteRowIndex,
+                ColumnIndex = columnIndex,
+                NewValue = e.ProposedValue
+            };
+
+            _modifiedCells.RemoveAll(c => c.RowIndex == change.RowIndex && c.ColumnIndex == change.ColumnIndex);
+            _modifiedCells.Add(change);
+
+            Log.Information("Cell changed: Row {Row}, Col {Col}", change.RowIndex, change.ColumnIndex);
+            (SaveFileCommand as VfxCommand)?.RaiseCanExecuteChanged();
         }
         /// <summary>
         /// Open file Excel and load data with paging
@@ -179,10 +226,12 @@ namespace ExcelAppCR.ViewModel
             if (string.IsNullOrEmpty(_filePath))
                 return;
 
+
             try
             {
                 // Get data for 
                 var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize));
+                _pageCache[PageIndex] = dataTable;
                 ExcelData = dataTable.DefaultView;
                 RefreshPaging();
             }

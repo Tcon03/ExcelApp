@@ -10,7 +10,7 @@
              xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
              d:DesignHeight="600" d:DesignWidth="1280">
     <UserControl.Resources>
-        <converters:BooleanToVisibilityConverter x:Key="BoolVisibili"/>
+        <!--<converters:BooleanToVisibilityConverter x:Key="BoolVisibili"/>-->
     </UserControl.Resources>
     <Grid Margin="0" 
               d:Background="White">
@@ -24,18 +24,45 @@
                     BorderThickness="1"
                     BorderBrush="Gray"
                     CornerRadius="10">
-                <DataGrid Background="Transparent"
-                        BorderBrush="Transparent" 
-                        BorderThickness="0"
-                        RowHeight="25"
-                        AlternatingRowBackground="#F8F9FA"
-                        AutoGenerateColumns="True" 
-                        EnableRowVirtualization="True"
-                        IsReadOnly="False" 
-                        VirtualizingPanel.IsVirtualizing="True" 
-                        VirtualizingPanel.VirtualizationMode="Recycling"
-                        ItemsSource="{Binding ExcelData}"
-                        Margin="5">
+                <DataGrid Background="White"
+                          BorderBrush="Transparent" 
+                           HeadersVisibility="Column"
+                          BorderThickness="0"
+                          GridLinesVisibility="All"
+                          AlternatingRowBackground="#F5F5F5"
+                          AutoGenerateColumns="True" 
+                          EnableRowVirtualization="True"
+                          IsReadOnly="False" 
+                          VirtualizingPanel.IsVirtualizing="True" 
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          SelectionMode="Single"
+                          SelectionUnit="FullRow"
+                          ItemsSource="{Binding ExcelData}"
+                          Margin="5">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Padding" Value="8,5"/>
+                            <Setter Property="FontSize" Value="15"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <!-- Cell Style -->
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="5,3"/>
+                            <Setter Property="FontSize" Value="15"/>
+                            <Setter Property="MinHeight" Value="30"/> 
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#E8F5E8"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
                 </DataGrid>
             </Border>
             <!--<Border Grid.Row="1"
@@ -65,7 +92,7 @@
                        FontWeight="Bold"
                        VerticalAlignment="Center"
                        FontSize="18">
-                     <Run Text="Total Row :"/>
+                     <Run Text="Total Record :"/>
                      <Run Text="{Binding RowCount , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
             </TextBlock>
 
@@ -91,7 +118,7 @@
                            FontSize="18"
                            FontWeight="Bold"
                            FontFamily="/Fonts/Nexa.ttf#Nexa"
-                           Margin="0 0 10 5"
+                           Margin="0 0 10 0"
                            VerticalAlignment="Center"/>
                 <ComboBox Width="80" 
                           Height="25"

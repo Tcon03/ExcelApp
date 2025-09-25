@@ -10,7 +10,7 @@
         xmlns:viewModel="clr-namespace:ExcelAppCR.ViewModel"
         mc:Ignorable="d"
         Icon="/Images/1excel.png"
-        Title="ExcelAppCRMain" Height="720" Width="1280">
+        Title="ExcelApp" Height="720" Width="1280">
     <Window.DataContext>
         <viewModel:MainViewModel/>
     </Window.DataContext>
