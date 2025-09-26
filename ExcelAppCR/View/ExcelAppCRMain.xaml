@@ -22,7 +22,8 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <StackPanel>
-                <Menu Background="#21A366">
+                <Menu Background="#21A366" 
+                      IsEnabled="{Binding IsNotProcessing}" >
                     <MenuItem 
                          FontFamily="/Fonts/Roboto.ttf#Roboto Black"
                          Header="_File"

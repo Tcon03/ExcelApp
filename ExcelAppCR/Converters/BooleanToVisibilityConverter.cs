@@ -15,16 +15,29 @@ namespace ExcelAppCR.Converters
         {
             if (value is bool boolValue && boolValue)
             {
-                // Nếu là true , trả về Visible
+                //true thì hiển thị ra 
                 return Visibility.Visible;
-
             }
-            // Ngược lại trả về Collapsed
             return Visibility.Collapsed;
 
+        }
 
-
-
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class InverseBooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool boolValue && boolValue)
+            {
+                // Nếu giá trị là true, trả
+                return Visibility.Collapsed;
+            }
+            //false thì hiển thị ra 
+            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

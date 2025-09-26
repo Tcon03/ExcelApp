@@ -27,61 +27,53 @@ namespace ExcelAppCR.Service
         /// </summary>
         /// <param name="filePath"> Đường dẫn của file Excel </param>
         /// <param name="pageIndex"> số thứ tự page muốn lấy </param>
-        /// <param name="pageSize"> Kích thước cuẩ mỗi page 100 ,1000 </param>
+        /// <param name="pageSize"> Kích thước của mỗi page 100 ,1000 </param>
         /// <returns> dataTable chứa dữ liệu</returns>
         public DataTable LoadExcelPage(string filePath, int pageIndex, int pageSize)
         {
             try
             {
-                // 1. lấy ra một dataTable rỗng
+                //1. Khởi tạo
                 var dataTable = new DataTable();
 
-                //2. xác định vị trí file excel
                 var fileInfo = new FileInfo(filePath);
                 Log.Information("Getting total row count from file: {FilePath}", filePath);
 
-                //3 . mở file excel và đọc dữ liệu
+                //2 . mở file excel và đọc dữ liệu
                 using (var package = new ExcelPackage(fileInfo))
                 {
-                    // 3.1 mở file excel và lấy ra sheet đầu tiên
+                    //3. Lấy trang tính đầu tiên
                     ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
                     Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
 
-                    //3.2 kiểm tra file excel có dữ liệu hay không nếu kh thì trả về dataTable rỗng
                     if (worksheet.Dimension == null)
                         return dataTable;
 
-                    //3.3 đếm xem có bao nhiêu dòng trong file excel
+                    //4. Lấy tổng số hàng và cột tạo cho dataTable  
                     var totalRows = worksheet.Dimension.Rows;
                     Log.Information("Total Rows in Excel ......: {TotalRows}", totalRows);
 
-                    //3.4 Đếm xem có bao nhiêu cột trong file excel
                     var totalCol = worksheet.Dimension.Columns;
                     Log.Information("Total Columns in Excel: {ColCount}", totalCol);
 
 
-                    // 3.5 nhìn vào cột đầu tiên và tạo các column tương ứng trong dataTable
                     for (int colI = 1; colI <= totalCol; colI++)
                     {
                         dataTable.Columns.Add(worksheet.Cells[1, colI].Value?.ToString() ?? $"Col{colI}");
                     }
 
-                    // Vì dòng 1 của Excel là dòng tiêu đề, nên dữ liệu thực tế bắt đầu từ dòng 2.Vậy nên, dòng dữ liệu thứ 10 sẽ
-                    //nằm ở hàng 11 trong Excel. Dòng bắt đầu của trang 2 sẽ là hàng 12.Phép toán(2 - 1) * 10 + 2 = 12 là hoàn toàn chính xác.
+                    //5. Tính toán vị trí hàng bắt đầu và kết thúc của trang hiện tại
                     var startRow = (pageIndex - 1) * pageSize + 2;
                     Log.Information("Loading Page {PageIndex}, Start Row: {StartRow}", pageIndex, startRow);
 
-                    //hàng kết thúc được lấy ra là start + sizeof - 1 header 
                     var endRow = Math.Min(startRow + pageSize - 1, totalRows);
                     Log.Information("End Row: {EndRow}", endRow);
 
-                    // Chỉ lặp qua thời điểm bắt đầu và đk kết thúc
                     for (int row = startRow; row <= endRow; row++)
                     {
                         var dataRow = dataTable.NewRow();
-                        Log.Information("Reading Row: {Row}", row);
+                        Log.Information("DataRow" + dataRow);
 
-                        // lặp qua all các cột 
                         for (int col = 1; col <= totalCol; col++)
                         {
                             dataRow[col - 1] = worksheet.Cells[row, col].Value;
@@ -98,6 +90,10 @@ namespace ExcelAppCR.Service
                 return default;
             }
         }
+
+        /// <summary>
+        /// Get total Record count of Excel file 
+        /// </summary>
         public async Task<long> GetTotalRowCount(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
@@ -108,11 +104,18 @@ namespace ExcelAppCR.Service
                 Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
                 if (worksheet.Dimension == null)
                     return 0;
-                var totalRows = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
-                Log.Information("Total Rows in Excel ......: {TotalRows}", totalRows);
-                return totalRows;
+                var totalRecords = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
+                Log.Information("Total Rows in Excel ......: {TotalRecord}", totalRecords);
+                return totalRecords;
             }
         }
+
+        /// <summary>
+        /// Fuction save changes to Excel File
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="changes"></param>
+        /// <returns></returns>
         public async Task SaveToFile(string filePath, List<ExcelFileInfo> changes)
         {
             await Task.Run(() =>
@@ -145,7 +148,7 @@ namespace ExcelAppCR.Service
                         }
                         package.Save();
                     }
-                    //ghì đè file tạm lên file gốc
+                    // copy đè file tạm lên file gốc
                     tempFileInfo.CopyTo(fileInfo.FullName, true);
 
                 }
@@ -154,8 +157,6 @@ namespace ExcelAppCR.Service
                 catch (Exception ex)
                 {
                     Log.Error("Error saving to Excel file: {Message}", ex.Message);
-
-
                 }
                 finally
                 {

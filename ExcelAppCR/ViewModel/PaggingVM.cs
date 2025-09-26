@@ -13,7 +13,7 @@ namespace ExcelAppCR.ViewModel
     public abstract class PaggingVM : ViewModelBase
     {
         #region
-        private int _pageSize = 10;
+        private int _pageSize = 500;
         public int PageSize
         {
             get { return _pageSize; }
@@ -28,17 +28,17 @@ namespace ExcelAppCR.ViewModel
             }
         }
 
-        private int _rowCount = 0;
-        public int RowCount
+        private int _totalRecord = 0;
+        public int TotalRecords
         {
-            get { return _rowCount; }
+            get { return _totalRecord; }
             set
             {
-                if (_rowCount != value)
+                if (_totalRecord != value)
                 {
-                    _rowCount = value;
-                    Log.Information("Row Count Changed : {RowCount}", _rowCount);
-                    RaisePropertyChanged(nameof(RowCount));
+                    _totalRecord = value;
+                    Log.Information("Row Count Changed : {RowCount}", _totalRecord);
+                    RaisePropertyChanged(nameof(TotalRecords));
                 }
             }
         }
@@ -54,6 +54,8 @@ namespace ExcelAppCR.ViewModel
                     _pageIndex = value;
                     Log.Information("Page Index Changed : {PageIndex}", _pageIndex);
                     RaisePropertyChanged(nameof(PageIndex));
+                    RefreshPaging();
+
                 }
             }
         }
@@ -71,30 +73,22 @@ namespace ExcelAppCR.ViewModel
                     _totalPages = value;
                     Log.Information("Total Pages Changed : {TotalPages}", _totalPages);
                     RaisePropertyChanged(nameof(TotalPages));
-                    RefreshPaging();
                 }
             }
         }
-        // công tắc trạng thái ngược lại của IsProcessing
-        //public bool IsNotProcessing
-        //{
-        //    get
-        //    {
-        //        return !_isProcessing;
-        //    }
+        // Thuộc tính ngược, tiện cho việc binding IsEnabled
+        public bool IsNotProcessing => !IsProcessing;
 
-        //}
-        // Công tắc  biết đang trong quá trình xử lý
-        private bool _isProcessing; // true : đang xử lý , false : không xử lý
+        private bool _isProcessing;
         public bool IsProcessing
         {
             get => _isProcessing;
             set
             {
                 _isProcessing = value;
-                Log.Information("IsProcessing Changed : {IsProcessing}", _isProcessing);
                 RaisePropertyChanged(nameof(IsProcessing));
-                //RaisePropertyChanged(nameof(IsNotProcessing));
+                Log.Information("IsProcessing Changed : {IsProcessing}", _isProcessing);
+                RaisePropertyChanged(nameof(IsNotProcessing));
             }
         }
 
@@ -103,7 +97,7 @@ namespace ExcelAppCR.ViewModel
 
         public PaggingVM()
         {
-            NextPageCommand = new VfxCommand( OnNextPage, CanGoNextPage);
+            NextPageCommand = new VfxCommand(OnNextPage, CanGoNextPage);
             PreviousPageCommand = new VfxCommand(OnPreviousPage, CanGoPreviousPage);
         }
 
@@ -119,13 +113,13 @@ namespace ExcelAppCR.ViewModel
         public virtual void OnPreviousPage(object obj)
         {
             //if (PageIndex > 1)
-                PageIndex--;
+            PageIndex--;
             //Log.Information("Navigated to Previous Page: {PageIndex}", PageIndex);
         }
 
         public bool CanGoNextPage()
         {
-            if (PageIndex < TotalPages )
+            if (PageIndex < TotalPages)
                 return true;
             return false;
         }
@@ -133,11 +127,11 @@ namespace ExcelAppCR.ViewModel
         public virtual void OnNextPage(object obj)
         {
             //if (PageIndex < TotalPages)
-                PageIndex++;
+            PageIndex++;
             //Log.Information("Navigated to Next Page: {PageIndex}", PageIndex);
         }
 
-        
+
         public void RefreshPaging()
         {
             (NextPageCommand as VfxCommand)?.RaiseCanExecuteChanged();

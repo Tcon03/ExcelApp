@@ -6,38 +6,72 @@
         xmlns:local="clr-namespace:Test2"
         mc:Ignorable="d"
         Title="Window2" Height="450" Width="800">
+    <Window.Resources>
+
+        <Style x:Key="ModernLoadingSpinnerStyle" TargetType="ProgressBar">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="White" CornerRadius="12" Padding="40,30" MinWidth="250">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="1" BlurRadius="15" Color="#E0E0E0" Opacity="0.6"/>
+                            </Border.Effect>
+
+                            <StackPanel>
+                                <Grid Width="50" Height="50" RenderTransformOrigin="0.5,0.5">
+
+                                    <Path Stroke="#3B82F6" StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                        <Path.Data>
+                                            <PathGeometry>
+                                                <PathFigure StartPoint="45,25">
+                                                    <ArcSegment Size="20,20" Point="25,5" SweepDirection="Clockwise" IsLargeArc="True"/>
+                                                </PathFigure>
+                                            </PathGeometry>
+                                        </Path.Data>
+                                    </Path>
+
+                                    <Grid.RenderTransform>
+                                        <RotateTransform Angle="0" />
+                                    </Grid.RenderTransform>
+                                </Grid>
+
+                                <TextBlock Text="Đang tải dữ liệu..."
+                                           FontSize="18"
+                                           Foreground="#4A5568"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,25,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsIndeterminate" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <DockPanel>
+        </DockPanel>
 
-            <!-- Toolbar -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-                <Button Name="BtnOpen"
-                        Content="Open Excel" 
-                        Width="100" 
-                        Height="30" 
-                    Margin="5" 
-                        Click="BtnOpen_Click"/>
-                <Button Name="BtnSave" Content="Save Excel" 
-                        Width="100"
-                        Height="30" 
-                        Margin="5" 
-                        Click="BtnSave_Click"/>
-                <TextBlock Name="TxtFileName" Text="Chưa mở file nào" 
-                       VerticalAlignment="Center" Margin="10,0"/>
-            </StackPanel>
+        <Border Background="#90FFFFFF" Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVisibilityConverter}}">
 
-            <!-- DataGrid để hiển thị và chỉnh sửa dữ liệu -->
-            <DataGrid
-                  Grid.Row="1" 
-                  Name="DataGridExcel"
-                  Margin="10"
-                  AutoGenerateColumns="True" 
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"/>
-        </Grid>
+            <ProgressBar IsIndeterminate="True" 
+                         Style="{StaticResource ModernLoadingSpinnerStyle}"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"/>
+        </Border>
     </Grid>
 </Window>
