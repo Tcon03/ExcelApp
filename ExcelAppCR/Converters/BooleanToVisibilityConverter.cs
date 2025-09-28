@@ -33,7 +33,7 @@ namespace ExcelAppCR.Converters
         {
             if (value is bool boolValue && boolValue)
             {
-                // Nếu giá trị là true, trả
+                // Nếu giá trị là true, ẩn 
                 return Visibility.Collapsed;
             }
             //false thì hiển thị ra 

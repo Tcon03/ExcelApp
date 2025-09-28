@@ -13,6 +13,15 @@ namespace ExcelAppCR.ViewModel
     public abstract class PaggingVM : ViewModelBase
     {
         #region
+
+
+        public IReadOnlyList<int> PageSizeOptions { get; } = new[] { 500, 1000,2000, 5000 };
+
+
+        protected virtual void OnPageSizeChanged(int newSize)
+        {
+
+        }
         private int _pageSize = 500;
         public int PageSize
         {
@@ -24,6 +33,7 @@ namespace ExcelAppCR.ViewModel
                     _pageSize = value;
                     Log.Information("Page Size Changed : {PageSize}", _pageSize);
                     RaisePropertyChanged(nameof(PageSize));
+                    OnPageSizeChanged(_pageSize);
                 }
             }
         }
@@ -54,8 +64,6 @@ namespace ExcelAppCR.ViewModel
                     _pageIndex = value;
                     Log.Information("Page Index Changed : {PageIndex}", _pageIndex);
                     RaisePropertyChanged(nameof(PageIndex));
-                    RefreshPaging();
-
                 }
             }
         }

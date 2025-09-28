@@ -30,15 +30,14 @@
                          Style="{StaticResource MenuItemStyle}">
                         <MenuItem 
                              Header="_New"
-                            Command="{Binding NewFile}" 
-                            CommandParameter="{Binding ElementName=_this}"
+                             Command="{Binding NewFile}" 
+                             CommandParameter="{Binding ElementName=_this}"
                              Foreground="Black" />
                         <MenuItem 
                              Header="_Open"
                              Foreground="Black" 
                              CommandParameter="{Binding ElementName=_this}"
                              Command="{Binding OpenExcelCommand}"/>
-
 
                         <MenuItem 
                              Header="_Save"
@@ -47,7 +46,7 @@
                              CommandParameter="{Binding ElementName=_this}" />
                         <Separator/>
                         <MenuItem Header="E_xit" 
-                                   Foreground="Black" />
+                                  Foreground="Black" />
                     </MenuItem>
                 </Menu>
             </StackPanel>

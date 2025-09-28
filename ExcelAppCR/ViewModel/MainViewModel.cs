@@ -30,6 +30,7 @@ namespace ExcelAppCR.ViewModel
     public class MainViewModel : PaggingVM
     {
 
+
         private string _filePath;
 
         private DataView _dataView;
@@ -51,14 +52,12 @@ namespace ExcelAppCR.ViewModel
                 {
                     _dataView.Table.ColumnChanged += OnCellChanged;
                 }
-
                 RaisePropertyChanged(nameof(ExcelData));
                 RaisePropertyChanged(nameof(HasData));
             }
         }
 
-        public bool HasData => TotalRecords > 0;
-        public bool HasDataTable => _dataView != null;
+        public bool HasData => _dataView != null;
 
         //Khi sửa ô nào đó ,không ghi ngay vào file mà chỉ ghi log vào list này.
         private List<ExcelFileInfo> _listChange = new List<ExcelFileInfo>();
@@ -79,6 +78,7 @@ namespace ExcelAppCR.ViewModel
             set
             {
                 _currentState = value;
+                Log.Information("Current State Changed: {CurrentState}", _currentState);
                 RaisePropertyChanged(nameof(CurrentState));
             }
         }
@@ -95,11 +95,13 @@ namespace ExcelAppCR.ViewModel
             OpenExcelCommand = new VfxCommand(OnOpen, () => true);
             SaveFileCommand = new VfxCommand(OnSave, () => true);
             NewFile = new VfxCommand(OnNewFile, () => true);
+            CurrentState = ViewState.Empty;
+
         }
 
         private void OnNewFile(object obj)
         {
-            if (HasDataTable)
+            if (HasData)
             {
                 var result = MessageBox.Show("Dữ liệu hiện tại sẽ bị mất. Bạn có chắc chắn muốn tạo file mới?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
@@ -144,6 +146,38 @@ namespace ExcelAppCR.ViewModel
             }
         }
 
+
+            protected override async void OnPageSizeChanged(int newSize)
+            {
+                try
+                {
+                    IsProcessing = true;
+
+                    // 1) Xóa cache vì page-size thay đổi
+                    _pageCache.Clear();
+
+                    // 2) Nếu đã biết TotalRecords thì tính lại TotalPages
+                    if (TotalRecords > 0)
+                    {
+                        TotalPages = (int)Math.Ceiling((double)TotalRecords / newSize);
+                    }
+
+                    // 3A) Cách đơn giản: về trang 1
+                    PageIndex = 1;
+
+                    RefreshPaging();
+
+                    // 4) Load lại dữ liệu nếu đã chọn file
+                    if (!string.IsNullOrEmpty(_filePath))
+                    {
+                        await LoadPageData();
+                    }
+                }
+                finally
+                {
+                    IsProcessing = false;
+                }
+            }
 
 
         private async void OnSave(object obj)
@@ -208,7 +242,6 @@ namespace ExcelAppCR.ViewModel
             if (openFileDialog.ShowDialog() != true)
                 return;
             _filePath = openFileDialog.FileName;
-            CurrentState = ViewState.Empty;
             PageIndex = 1;
             try
             {
@@ -222,7 +255,6 @@ namespace ExcelAppCR.ViewModel
                 MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
                                  "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
         }
 
         /// <summary>
@@ -247,6 +279,7 @@ namespace ExcelAppCR.ViewModel
                 ExcelData = dataTable.DefaultView;
                 RefreshPaging();
                 CurrentState = ViewState.DataLoaded;
+
             }
             catch (Exception ex)
             {
