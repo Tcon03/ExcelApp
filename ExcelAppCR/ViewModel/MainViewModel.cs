@@ -21,8 +21,15 @@ using System.Windows.Input;
 
 namespace ExcelAppCR.ViewModel
 {
+    public enum ViewState
+    {
+        Empty,
+        Loading,
+        DataLoaded
+    }
     public class MainViewModel : PaggingVM
     {
+
 
         private string _filePath;
 
@@ -32,34 +39,50 @@ namespace ExcelAppCR.ViewModel
             get { return _dataView; }
             set
             {
+                // hủy đăng ký sự kiện cũ 
                 if (_dataView?.Table != null)
                 {
                     _dataView.Table.ColumnChanged -= OnCellChanged;
                 }
+                // gán giá trị mới
                 _dataView = value;
 
+                // đăng ký sự kiện mới
                 if (_dataView?.Table != null)
                 {
                     _dataView.Table.ColumnChanged += OnCellChanged;
                 }
-
                 RaisePropertyChanged(nameof(ExcelData));
                 RaisePropertyChanged(nameof(HasData));
             }
         }
 
-        public bool HasData => ExcelData != null && ExcelData.Count > 0;
+        public bool HasData => _dataView != null;
 
-        // Dùng để lưu trữ thay đổi trên các trang
-        private List<ExcelFileInfo> _modifiedCells = new List<ExcelFileInfo>();
+        //Khi sửa ô nào đó ,không ghi ngay vào file mà chỉ ghi log vào list này.
+        private List<ExcelFileInfo> _listChange = new List<ExcelFileInfo>();
 
-        // lưu lại các trang đã được tải để dùng lại khi  chuyển trang
-
+        // lưu các trang lại sau khi next hoặc previous để không phải load lại từ file
         private Dictionary<int, DataTable> _pageCache = new Dictionary<int, DataTable>();
         public MainViewModel()
         {
             InitData();
         }
+
+
+
+        private ViewState _currentState = ViewState.Empty; // Trạng thái ban đầu
+        public ViewState CurrentState
+        {
+            get => _currentState;
+            set
+            {
+                _currentState = value;
+                Log.Information("Current State Changed: {CurrentState}", _currentState);
+                RaisePropertyChanged(nameof(CurrentState));
+            }
+        }
+
 
 
         ExcelService _excelService;
@@ -72,10 +95,14 @@ namespace ExcelAppCR.ViewModel
             OpenExcelCommand = new VfxCommand(OnOpen, () => true);
             SaveFileCommand = new VfxCommand(OnSave, () => true);
             NewFile = new VfxCommand(OnNewFile, () => true);
+            CurrentState = ViewState.Empty;
+
         }
 
         private void OnNewFile(object obj)
         {
+            CurrentState = ViewState.DataLoaded;
+
             if (HasData)
             {
                 var result = MessageBox.Show("Dữ liệu hiện tại sẽ bị mất. Bạn có chắc chắn muốn tạo file mới?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -110,7 +137,7 @@ namespace ExcelAppCR.ViewModel
                 ExcelData = table.DefaultView;
                 PageIndex = 1;
                 TotalPages = 0;
-                RowCount = 0;
+                TotalRecords = 0;
                 _filePath = string.Empty;
                 RefreshPaging();
             }
@@ -122,32 +149,43 @@ namespace ExcelAppCR.ViewModel
         }
 
 
-        private async void OnSaveAs(object obj)
+        protected override async void OnPageSizeChanged(int newSize)
         {
-            //SaveFileDialog saveFile = new SaveFileDialog
-            //{
-            //    Title = "Save Excel File",
-            //    Filter = "Excel Files|*.xlsx",
-            //    DefaultExt = ".xlsx",
-            //    FileName = _filePath
-            //};
-            //Log.Information("File Path : " + saveFile.FileName);
-            //if (saveFile.ShowDialog() != true)
-            //    return;
-            //string path = saveFile.FileName;
-        }
-        private async void OnSave(object obj)
-        {
-
-
-
             try
             {
-                await _excelService.SaveToFile(_filePath, _modifiedCells);
-                _modifiedCells.Clear();
+                IsProcessing = true;
+
+                // 1) Xóa cache vì page-size thay đổi
+                _pageCache.Clear();
+
+                // 2) Nếu đã biết TotalRecords thì tính lại TotalPages
+                if (TotalRecords > 0)
+                {
+                    TotalPages = (int)Math.Ceiling((double)TotalRecords / newSize);
+                }
+
+                // 3A) Cách đơn giản: về trang 1
+                PageIndex = 1;
+
+                RefreshPaging();
+                await LoadPageData();
+            }
+            finally
+            {
+                IsProcessing = false;
+            }
+        }
+
+
+        private async void OnSave(object obj)
+        {
+            try
+            {
+                await _excelService.SaveToFile(_filePath, _listChange);
+                _listChange.Clear();
                 _pageCache.Clear();
                 MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadPageData();
+
 
             }
             catch (Exception ex)
@@ -161,24 +199,29 @@ namespace ExcelAppCR.ViewModel
 
         private void OnCellChanged(object sender, DataColumnChangeEventArgs e)
         {
+            //1 Tính Toán vị trí tuyệt đối của ô trong file Excel
             var rowIndexOnPage = e.Row.Table.Rows.IndexOf(e.Row);
             Log.Information("Row Index On Page: {RowIndexOnPage}", rowIndexOnPage);
-            var absoluteRowIndex = ((PageIndex - 1) * PageSize) + rowIndexOnPage + 2; 
+
+            var absoluteRowIndex = ((PageIndex - 1) * PageSize) + rowIndexOnPage + 2;
             Log.Information("Absolute Row Index: {AbsoluteRowIndex}", absoluteRowIndex);
-            var columnIndex = e.Column.Ordinal + 1; 
+            var columnIndex = e.Column.Ordinal + 1;
             Log.Information("Column Index: {ColumnIndex}", columnIndex);
 
-               var change = new ExcelFileInfo
+            // 2. tạo đối tượng ExcelFileInfo để lưu thông tin thay đổi
+            var _change = new ExcelFileInfo
             {
                 RowIndex = absoluteRowIndex,
                 ColumnIndex = columnIndex,
                 NewValue = e.ProposedValue
             };
 
-            _modifiedCells.RemoveAll(c => c.RowIndex == change.RowIndex && c.ColumnIndex == change.ColumnIndex);
-            _modifiedCells.Add(change);
+            //3. kiểm tra và cập nhật thay đổi mới vào danh sách 
+            _listChange.RemoveAll(c => c.RowIndex == _change.RowIndex && c.ColumnIndex == _change.ColumnIndex);
+            _listChange.Add(_change);
 
-            Log.Information("Cell changed: Row {Row}, Col {Col}", change.RowIndex, change.ColumnIndex);
+            Log.Information("Cell changed: Row {Row}, Col {Col}", _change.RowIndex, _change.ColumnIndex);
+
             (SaveFileCommand as VfxCommand)?.RaiseCanExecuteChanged();
         }
         /// <summary>
@@ -196,49 +239,68 @@ namespace ExcelAppCR.ViewModel
             if (openFileDialog.ShowDialog() != true)
                 return;
             _filePath = openFileDialog.FileName;
-            IsProcessing = true;
-
             try
             {
-                RowCount = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
-                Log.Information("RowCount :" + RowCount);
-                TotalPages = (int)Math.Ceiling((double)RowCount / PageSize);
+                CurrentState = ViewState.Loading;
+                TotalRecords = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
+                Log.Information("Total Record :" + TotalRecords);
+                TotalPages = (int)Math.Ceiling((double)TotalRecords / PageSize);
                 await LoadPageData();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
                                  "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                RefreshPaging();
-                IsProcessing = false;
             }
         }
 
         /// <summary>
-        /// Load dữ liệu trang hiện tại từ file Excel
+        /// Load Data from Excel file
         /// </summary>
-        /// <returns></returns>
         public async Task LoadPageData()
         {
-            if (string.IsNullOrEmpty(_filePath))
+            CurrentState = ViewState.Loading;
+            if (_pageCache.ContainsKey(PageIndex))
+            {
+                ExcelData = _pageCache[PageIndex].DefaultView;
+                Log.Information("ExcelDât: {ExcelData}", ExcelData);
+                RefreshPaging();
+                CurrentState = ViewState.DataLoaded;
                 return;
-
-
+            }
             try
             {
                 // Get data for 
                 var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize));
+                // lưu vào cache
                 _pageCache[PageIndex] = dataTable;
                 ExcelData = dataTable.DefaultView;
                 RefreshPaging();
+                CurrentState = ViewState.DataLoaded;
+
             }
             catch (Exception ex)
             {
+                CurrentState = ViewState.Empty;
                 MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
                                  "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+
+        }
+
+
+        public override async void OnNextPage(object obj)
+        {
+            try
+            {
+                IsProcessing = true;
+                if (CanGoNextPage())
+                {
+                    PageIndex++;
+                    await LoadPageData();
+                }
+
             }
             finally
             {
@@ -246,20 +308,21 @@ namespace ExcelAppCR.ViewModel
             }
         }
 
-        public override async void OnNextPage(object obj)
-        {
-            if (CanGoNextPage())
-            {
-                PageIndex++;
-                await LoadPageData();
-            }
-        }
+
         public override async void OnPreviousPage(object obj)
         {
-            if (CanGoPreviousPage())
+            try
             {
-                PageIndex--;
-                await LoadPageData();
+                IsProcessing = true;
+                if (CanGoPreviousPage())
+                {
+                    PageIndex--;
+                    await LoadPageData();
+                }
+            }
+            finally
+            {
+                IsProcessing = false;
             }
         }
     }

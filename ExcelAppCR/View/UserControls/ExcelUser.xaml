@@ -5,34 +5,148 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ExcelAppCR.View.UserControls"
              xmlns:converters="clr-namespace:ExcelAppCR.Converters"
+             xmlns:vm="clr-namespace:ExcelAppCR.ViewModel"
              mc:Ignorable="d" 
              x:Name="root"
-             xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"  
              d:DesignHeight="600" d:DesignWidth="1280">
     <UserControl.Resources>
-        <!--<converters:BooleanToVisibilityConverter x:Key="BoolVisibili"/>-->
+        <converters:BooleanToVisibilityConverter x:Key="BoolVisibility"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolVisibility"/>
+        <Style x:Key="CircleStyle" TargetType="ProgressBar">
+            <Setter Property="Foreground" Value="#3B82F6"/>
+            <Setter Property="IsIndeterminate" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- Vòng quay -->
+                            <Grid x:Name="Spinner" Width="50" 
+                                  Height="50" 
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform>
+                                    <!-- Đặt tên để storyboard bám vào -->
+                                    <RotateTransform x:Name="SpinnerRotate" Angle="0"/>
+                                </Grid.RenderTransform>
+
+                                <!-- Cung tròn (một đoạn của vòng tròn) -->
+                                <Path Stroke="{TemplateBinding Foreground}"
+                                      StrokeThickness="6"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round">
+                                    <Path.Data>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="45,25">
+                                                <!-- Cung 270° tạo cảm giác "đầu–đuôi" khi quay -->
+                                                <ArcSegment Size="20,20"
+                                                    Point="25,5"
+                                                    IsLargeArc="True"
+                                                    SweepDirection="Clockwise"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </Path.Data>
+                                </Path>
+                            </Grid>
+
+                            <!-- Nhãn trạng thái -->
+                            <TextBlock Text="Đang tải dữ liệu..."
+                               FontSize="14"
+                               Foreground="#4A5568"
+                               HorizontalAlignment="Center"
+                               Margin="0,12,0,0"/>
+                        </StackPanel>
+
+                        <!-- Kích hoạt animation khi indeterminate -->
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsIndeterminate" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard x:Name="SpinStoryboard">
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <!-- Cách 1: target vào Grid và đi qua RenderTransform.Angle -->
+                                            <DoubleAnimation
+                                        Storyboard.TargetName="Spinner"
+                                        Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                        From="0" To="360" Duration="0:0:1"/>
+                                            <!-- Hoặc Cách 2: target trực tiếp vào RotateTransform
+                                    <DoubleAnimation
+                                        Storyboard.TargetName="SpinnerRotate"
+                                        Storyboard.TargetProperty="Angle"
+                                        From="0" To="360" Duration="0:0:1" />
+                                    -->
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="SpinStoryboard"/>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LoadDataStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" 
+                    Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CurrentState}" 
+                             Value="{x:Static vm:ViewState.DataLoaded}">
+                    <Setter Property="Visibility" 
+                            Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="EmptyStyle"
+               TargetType="FrameworkElement">
+            <Setter Property="Visibility"
+                    Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CurrentState}" 
+                             Value="{x:Static vm:ViewState.Empty}">
+                    <Setter Property="Visibility" 
+                            Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LoadingPanelStyle" 
+               TargetType="FrameworkElement">
+            <Setter Property="Visibility" 
+                    Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CurrentState}" 
+                             Value="{x:Static vm:ViewState.Loading}">
+                    <Setter Property="Visibility"
+                            Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
     <Grid Margin="0" 
-              d:Background="White">
+          Background="#FFFFFF">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
 
-            <Border Margin="5"
-                    BorderThickness="1"
-                    BorderBrush="Gray"
+            <Border Margin="10"
+                    BorderThickness="2"
+                    BorderBrush="LightGray"
                     CornerRadius="10">
                 <DataGrid Background="White"
                           BorderBrush="Transparent" 
-                           HeadersVisibility="Column"
+                          HeadersVisibility="Column"
                           BorderThickness="0"
                           GridLinesVisibility="All"
                           AlternatingRowBackground="#F5F5F5"
                           AutoGenerateColumns="True" 
                           EnableRowVirtualization="True"
                           IsReadOnly="False" 
+                          Style="{StaticResource LoadDataStyle}"
                           VirtualizingPanel.IsVirtualizing="True" 
                           VirtualizingPanel.VirtualizationMode="Recycling"
                           SelectionMode="Single"
@@ -54,7 +168,7 @@
                         <Style TargetType="DataGridCell">
                             <Setter Property="Padding" Value="5,3"/>
                             <Setter Property="FontSize" Value="15"/>
-                            <Setter Property="MinHeight" Value="30"/> 
+                            <Setter Property="MinHeight" Value="30"/>
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#E8F5E8"/>
@@ -65,46 +179,119 @@
                     </DataGrid.CellStyle>
                 </DataGrid>
             </Border>
-            <!--<Border Grid.Row="1"
-                    Background="White" 
-                    Visibility="{Binding IsProcessing,
-                    Converter={StaticResource BoolVisibili}}">
+
+
+            <Border Background="White"
+                    Style="{StaticResource EmptyStyle}">
                 <StackPanel VerticalAlignment="Center" 
-                           HorizontalAlignment="Center">
+                            HorizontalAlignment="Center">
                     <TextBlock Text="📄" 
-                               FontSize="48" 
-                               HorizontalAlignment="Center" 
-                               Foreground="#BDC3C7"/>
-                    <TextBlock Text="No data loaded yet" 
-                                FontSize="16"
-                                Foreground="#7F8C8D" 
-                                HorizontalAlignment="Center" 
-                                Margin="0,10,0,0"/>
-
+                               FontSize="70"
+                               Foreground="LightGray"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="No data loaded yet"
+                               FontSize="20" 
+                               Foreground="#212529"
+                               FontWeight="DemiBold"
+                               Margin="0,10,0,0"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Open a file or create a new one to get started "
+                               FontSize="20" 
+                               Margin="0 5 0 0"
+                               Foreground="Gray"
+                               HorizontalAlignment="Center"/>
+                    <StackPanel Margin="20">
+                        <Button Command="{Binding OpenExcelCommand}"
+                                CommandParameter="{Binding ElementName=root}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="FontSize" Value="17"/>
+                                    <Setter Property="Height" Value="40"/>
+                                    <Setter Property="Width" Value="180"/>
+                                    <Setter Property="Background" Value="#4C6EF5"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                                        CornerRadius="6">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                     VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#4C6EF5"/>
+                                                        <Setter Property="Foreground"
+                                                                Value="White"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter Property="Background" 
+                                                                Value="#364FC7"/>
+                                                        <Setter Property="Foreground"
+                                                                Value="White"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Icon:PackIconBootstrapIcons 
+                                        Kind="Folder2Open" 
+                                        Width="20" 
+                                        Foreground="Yellow"
+                                        FontWeight="Bold"
+                                        Height="30" 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                <TextBlock Text="Open Folder"
+                                          VerticalAlignment="Center"
+                                          Foreground="White"
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
-            </Border>-->
-        </Grid>
+            </Border>
 
+            <Border Background="#80FFFFFF" 
+                    Style="{StaticResource LoadingPanelStyle}">
+                <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True"
+                                 Style="{StaticResource CircleStyle}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+        
         <Grid Grid.Row="1">
+
             <TextBlock HorizontalAlignment="Left" 
                        Margin="10 0"
                        FontFamily="/Fonts/Nexa.ttf#Nexa"
                        FontWeight="Bold"
+                       Foreground="#212529"
                        VerticalAlignment="Center"
                        FontSize="18">
                      <Run Text="Total Record :"/>
-                     <Run Text="{Binding RowCount , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
+                     <Run Text="{Binding TotalRecords, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
             </TextBlock>
 
             <StackPanel HorizontalAlignment="Right"
                         Margin="10 5 15 5"
                         Orientation="Horizontal">
-                <TextBlock Text="📊 Processing Status:" 
+                <!--<TextBlock Text="📊 Processing Status:" 
                             FontWeight="Bold"
                             FontSize="15"
                             FontFamily="/Fonts/Nexa.ttf#Nexa"
                             VerticalAlignment="Center"
-                            Margin="0,0,10,0"/>
+                            Margin="0,0,10,0"/>-->
 
                 <!--<ProgressBar Height="20" 
                              Margin="0 0 50 0" 
@@ -117,21 +304,22 @@
                 <TextBlock Text="Page Size :" 
                            FontSize="18"
                            FontWeight="Bold"
+                            Foreground="#212529"
                            FontFamily="/Fonts/Nexa.ttf#Nexa"
-                           Margin="0 0 10 0"
+                           Margin="0 0 15 2"
                            VerticalAlignment="Center"/>
                 <ComboBox Width="80" 
                           Height="25"
-                          SelectedValue="{Binding PageSize}"
-                          VerticalAlignment="Center"
+                          FontWeight="Bold"
+                           Foreground="#212529"
+                          ItemsSource="{Binding PageSizeOptions}"
+                          IsEnabled="{Binding IsNotProcessing}"
+                          SelectedItem="{Binding PageSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Margin="0,0,20,0">
-                    <ComboBoxItem Content="100"/>
-                    <ComboBoxItem Content="500"/>
-                    <ComboBoxItem Content="1000"/>
-                    <ComboBoxItem Content="2000"/>
-                    <ComboBoxItem Content="5000"/>
+
                 </ComboBox>
                 <Button Style="{StaticResource btnNP }"
+                        IsEnabled="{Binding IsNotProcessing}"
                         Command="{Binding PreviousPageCommand}"
                         CommandParameter="{Binding ElementName=root}">
                     <Image Source="/Images/backP.png"
@@ -142,11 +330,12 @@
                         FontSize="20"
                         VerticalAlignment="Center">
                     <Run Text="{Binding PageIndex , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
-                    <Run Text="of"/> 
+                    <Run Text="/"/> 
                     <Run Text="{Binding TotalPages , Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 </TextBlock>
                 <Button Style="{StaticResource btnNP}"
                         Command="{Binding NextPageCommand }" 
+                         IsEnabled="{Binding IsNotProcessing}"
                         CommandParameter="{Binding ElementName=root}">
                     <Image Source="/Images/nextP.png"
                            Margin="5"/>
@@ -154,6 +343,8 @@
             </StackPanel>
 
         </Grid>
+        <Separator Margin="10 0 10 -700"/>
+
     </Grid>
 
 

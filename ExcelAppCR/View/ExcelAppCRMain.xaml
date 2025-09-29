@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExcelAppCR.View"
          xmlns:userContol="clr-namespace:ExcelAppCR.View.UserControls"
-        xmlns:Icon ="http://metro.mahapps.com/winfx/xaml/controls"
         x:Name="_this"
+        xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"  
         xmlns:viewModel="clr-namespace:ExcelAppCR.ViewModel"
         mc:Ignorable="d"
         Icon="/Images/1excel.png"
@@ -20,43 +20,49 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" >
+
+
             <StackPanel>
-                <Menu Background="#21A366">
+                <Menu Background="{StaticResource GradientBrush}" 
+                      IsEnabled="{Binding IsNotProcessing}" >
                     <MenuItem 
                          FontFamily="/Fonts/Roboto.ttf#Roboto Black"
                          Header="_File"
+                         Foreground="White"
                          Style="{StaticResource MenuItemStyle}">
                         <MenuItem 
                              Header="_New"
-                            Command="{Binding NewFile}" 
-                            CommandParameter="{Binding ElementName=_this}"
-                             Foreground="Black" />
+                             Foreground="Black"
+                             Command="{Binding NewFile}" 
+                             CommandParameter="{Binding ElementName=_this}"
+                             />
                         <MenuItem 
                              Header="_Open"
-                             Foreground="Black" 
+                             Foreground="Black"
                              CommandParameter="{Binding ElementName=_this}"
                              Command="{Binding OpenExcelCommand}"/>
 
-
                         <MenuItem 
                              Header="_Save"
-                             Foreground="Black" 
+                             Foreground="Black"
                              Command="{Binding SaveFileCommand}"
                              CommandParameter="{Binding ElementName=_this}" />
-                        <Separator/>
+                        <!--<Separator/>-->
                         <MenuItem Header="E_xit" 
-                                   Foreground="Black" />
+                                  Foreground="Black"/>
+
                     </MenuItem>
                 </Menu>
             </StackPanel>
         </Grid>
-
+        <Separator Grid.Row="0" 
+                   Margin="10 40 10 0"/>
 
         <Grid Grid.Row="1">
             <userContol:ExcelUser/>
         </Grid>
 
-       
+
     </Grid>
 </Window>
