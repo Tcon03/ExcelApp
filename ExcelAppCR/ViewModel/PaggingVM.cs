@@ -15,9 +15,7 @@ namespace ExcelAppCR.ViewModel
         #region
 
 
-        public IReadOnlyList<int> PageSizeOptions { get; } = new[] { 500, 1000,2000, 5000 };
-
-
+        public IReadOnlyList<int> PageSizeOptions { get; } = new[] { 500, 1000, 2000, 5000 };
         protected virtual void OnPageSizeChanged(int newSize)
         {
 
@@ -100,6 +98,18 @@ namespace ExcelAppCR.ViewModel
             }
         }
 
+        private bool _isSaved;
+        public bool IsSaved
+        {
+            get => _isSaved;
+            set
+            {
+                _isSaved = value;
+                RaisePropertyChanged(nameof(IsSaved));
+                Log.Information("IsSaved Changed : {IsSaved}", _isSaved);
+            }
+        }
+
         #endregion
 
 
@@ -108,8 +118,6 @@ namespace ExcelAppCR.ViewModel
             NextPageCommand = new VfxCommand(OnNextPage, CanGoNextPage);
             PreviousPageCommand = new VfxCommand(OnPreviousPage, CanGoPreviousPage);
         }
-
-
 
         public bool CanGoPreviousPage()
         {

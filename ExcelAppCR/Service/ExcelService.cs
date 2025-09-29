@@ -120,7 +120,8 @@ namespace ExcelAppCR.Service
         {
             await Task.Run(() =>
             {
-
+                if (filePath == null)
+                    return;
                 var fileInfo = new FileInfo(filePath);
                 Log.Information("Name FilePath: {FilePath}", filePath);
 
