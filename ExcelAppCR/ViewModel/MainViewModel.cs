@@ -101,6 +101,8 @@ namespace ExcelAppCR.ViewModel
 
         private void OnNewFile(object obj)
         {
+            CurrentState = ViewState.DataLoaded;
+
             if (HasData)
             {
                 var result = MessageBox.Show("Dữ liệu hiện tại sẽ bị mất. Bạn có chắc chắn muốn tạo file mới?", "Xác nhận", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -147,37 +149,32 @@ namespace ExcelAppCR.ViewModel
         }
 
 
-            protected override async void OnPageSizeChanged(int newSize)
+        protected override async void OnPageSizeChanged(int newSize)
+        {
+            try
             {
-                try
+                IsProcessing = true;
+
+                // 1) Xóa cache vì page-size thay đổi
+                _pageCache.Clear();
+
+                // 2) Nếu đã biết TotalRecords thì tính lại TotalPages
+                if (TotalRecords > 0)
                 {
-                    IsProcessing = true;
-
-                    // 1) Xóa cache vì page-size thay đổi
-                    _pageCache.Clear();
-
-                    // 2) Nếu đã biết TotalRecords thì tính lại TotalPages
-                    if (TotalRecords > 0)
-                    {
-                        TotalPages = (int)Math.Ceiling((double)TotalRecords / newSize);
-                    }
-
-                    // 3A) Cách đơn giản: về trang 1
-                    PageIndex = 1;
-
-                    RefreshPaging();
-
-                    // 4) Load lại dữ liệu nếu đã chọn file
-                    if (!string.IsNullOrEmpty(_filePath))
-                    {
-                        await LoadPageData();
-                    }
+                    TotalPages = (int)Math.Ceiling((double)TotalRecords / newSize);
                 }
-                finally
-                {
-                    IsProcessing = false;
-                }
+
+                // 3A) Cách đơn giản: về trang 1
+                PageIndex = 1;
+
+                RefreshPaging();
+                await LoadPageData();
             }
+            finally
+            {
+                IsProcessing = false;
+            }
+        }
 
 
         private async void OnSave(object obj)
@@ -242,9 +239,9 @@ namespace ExcelAppCR.ViewModel
             if (openFileDialog.ShowDialog() != true)
                 return;
             _filePath = openFileDialog.FileName;
-            PageIndex = 1;
             try
             {
+                CurrentState = ViewState.Loading;
                 TotalRecords = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
                 Log.Information("Total Record :" + TotalRecords);
                 TotalPages = (int)Math.Ceiling((double)TotalRecords / PageSize);
@@ -268,6 +265,7 @@ namespace ExcelAppCR.ViewModel
                 ExcelData = _pageCache[PageIndex].DefaultView;
                 Log.Information("ExcelDât: {ExcelData}", ExcelData);
                 RefreshPaging();
+                CurrentState = ViewState.DataLoaded;
                 return;
             }
             try

@@ -5,10 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ExcelAppCR.View.UserControls"
              xmlns:converters="clr-namespace:ExcelAppCR.Converters"
-              xmlns:vm="clr-namespace:ExcelAppCR.ViewModel"
+             xmlns:vm="clr-namespace:ExcelAppCR.ViewModel"
              mc:Ignorable="d" 
              x:Name="root"
-             xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"  
              d:DesignHeight="600" d:DesignWidth="1280">
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolVisibility"/>
@@ -126,16 +126,16 @@
 
     </UserControl.Resources>
     <Grid Margin="0" 
-              d:Background="White">
+          Background="#FFFFFF">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
 
-            <Border Margin="5"
-                    BorderThickness="1"
-                    BorderBrush="Gray"
+            <Border Margin="10"
+                    BorderThickness="2"
+                    BorderBrush="LightGray"
                     CornerRadius="10">
                 <DataGrid Background="White"
                           BorderBrush="Transparent" 
@@ -186,15 +186,77 @@
                 <StackPanel VerticalAlignment="Center" 
                             HorizontalAlignment="Center">
                     <TextBlock Text="📄" 
-                               FontSize="100"
-                               Foreground="#BDC3C7" 
+                               FontSize="70"
+                               Foreground="LightGray"
                                HorizontalAlignment="Center"/>
                     <TextBlock Text="No data loaded yet"
                                FontSize="20" 
-                               Foreground="#7F8C8D"
+                               Foreground="#212529"
+                               FontWeight="DemiBold"
                                Margin="0,10,0,0"
                                HorizontalAlignment="Center"/>
-
+                    <TextBlock Text="Open a file or create a new one to get started "
+                               FontSize="20" 
+                               Margin="0 5 0 0"
+                               Foreground="Gray"
+                               HorizontalAlignment="Center"/>
+                    <StackPanel Margin="20">
+                        <Button Command="{Binding OpenExcelCommand}"
+                                CommandParameter="{Binding ElementName=root}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="FontSize" Value="17"/>
+                                    <Setter Property="Height" Value="40"/>
+                                    <Setter Property="Width" Value="180"/>
+                                    <Setter Property="Background" Value="#4C6EF5"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="FontWeight" Value="Medium" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                                        CornerRadius="6">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                     VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="#4C6EF5"/>
+                                                        <Setter Property="Foreground"
+                                                                Value="White"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter Property="Background" 
+                                                                Value="#364FC7"/>
+                                                        <Setter Property="Foreground"
+                                                                Value="White"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Icon:PackIconBootstrapIcons 
+                                        Kind="Folder2Open" 
+                                        Width="20" 
+                                        Foreground="Yellow"
+                                        FontWeight="Bold"
+                                        Height="30" 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                <TextBlock Text="Open Folder"
+                                          VerticalAlignment="Center"
+                                          Foreground="White"
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
@@ -207,12 +269,14 @@
                 </StackPanel>
             </Border>
         </Grid>
-
+        
         <Grid Grid.Row="1">
+
             <TextBlock HorizontalAlignment="Left" 
                        Margin="10 0"
                        FontFamily="/Fonts/Nexa.ttf#Nexa"
                        FontWeight="Bold"
+                       Foreground="#212529"
                        VerticalAlignment="Center"
                        FontSize="18">
                      <Run Text="Total Record :"/>
@@ -240,21 +304,22 @@
                 <TextBlock Text="Page Size :" 
                            FontSize="18"
                            FontWeight="Bold"
+                            Foreground="#212529"
                            FontFamily="/Fonts/Nexa.ttf#Nexa"
                            Margin="0 0 15 2"
                            VerticalAlignment="Center"/>
                 <ComboBox Width="80" 
                           Height="25"
                           FontWeight="Bold"
+                           Foreground="#212529"
                           ItemsSource="{Binding PageSizeOptions}"
                           IsEnabled="{Binding IsNotProcessing}"
                           SelectedItem="{Binding PageSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                          VerticalAlignment="Center"
                           Margin="0,0,20,0">
-                  
+
                 </ComboBox>
                 <Button Style="{StaticResource btnNP }"
-                         IsEnabled="{Binding IsNotProcessing}"
+                        IsEnabled="{Binding IsNotProcessing}"
                         Command="{Binding PreviousPageCommand}"
                         CommandParameter="{Binding ElementName=root}">
                     <Image Source="/Images/backP.png"
@@ -265,7 +330,7 @@
                         FontSize="20"
                         VerticalAlignment="Center">
                     <Run Text="{Binding PageIndex , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
-                    <Run Text="of"/> 
+                    <Run Text="/"/> 
                     <Run Text="{Binding TotalPages , Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 </TextBlock>
                 <Button Style="{StaticResource btnNP}"
@@ -278,6 +343,8 @@
             </StackPanel>
 
         </Grid>
+        <Separator Margin="10 0 10 -700"/>
+
     </Grid>
 
 
