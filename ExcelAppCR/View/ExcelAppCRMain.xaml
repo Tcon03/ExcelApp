@@ -48,7 +48,7 @@
                              Foreground="Black"
                              Command="{Binding SaveFileCommand}"
                              CommandParameter="{Binding ElementName=_this}" />
-                        <!--<Separator/>-->
+                        <Separator/>
                         <MenuItem Header="E_xit" 
                                   Foreground="Black"/>
 
@@ -56,8 +56,8 @@
                 </Menu>
             </StackPanel>
         </Grid>
-        <Separator Grid.Row="0" 
-                   Margin="10 40 10 0"/>
+        <!--<Separator Grid.Row="0" 
+                   Margin="10 40 10 0"/>-->
 
         <Grid Grid.Row="1">
             <userContol:ExcelUser/>

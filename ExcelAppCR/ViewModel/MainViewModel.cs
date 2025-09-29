@@ -25,7 +25,8 @@ namespace ExcelAppCR.ViewModel
     {
         Empty,
         Loading,
-        DataLoaded
+        DataLoaded,
+        DataSave
     }
     public class MainViewModel : PaggingVM
     {
@@ -151,6 +152,13 @@ namespace ExcelAppCR.ViewModel
 
         protected override async void OnPageSizeChanged(int newSize)
         {
+            if (HasData == false)
+            {
+                _pageCache.Clear();
+                _listChange.Clear();
+                RefreshPaging();
+                return;
+            }
             try
             {
                 IsProcessing = true;
@@ -179,22 +187,42 @@ namespace ExcelAppCR.ViewModel
 
         private async void OnSave(object obj)
         {
+            if (HasData == false)
+            {
+                MessageBox.Show("Không có dữ liệu để lưu!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (string.IsNullOrEmpty(_filePath))
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Title = "Save Excel File",
+                    Filter = "Excel Files|*.xlsx",
+                    DefaultExt = ".xlsx"
+                };
+                if (saveFileDialog.ShowDialog() != true)
+                    return;
+                _filePath = saveFileDialog.FileName;
+                MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            IsSaved = true;
             try
             {
                 await _excelService.SaveToFile(_filePath, _listChange);
                 _listChange.Clear();
                 _pageCache.Clear();
                 MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi save ! ", "Errorr", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            finally
+            {
+                IsSaved = false;
+            }
         }
-
 
 
         private void OnCellChanged(object sender, DataColumnChangeEventArgs e)
@@ -238,6 +266,7 @@ namespace ExcelAppCR.ViewModel
             };
             if (openFileDialog.ShowDialog() != true)
                 return;
+            IsProcessing = true;
             _filePath = openFileDialog.FileName;
             try
             {
@@ -251,6 +280,10 @@ namespace ExcelAppCR.ViewModel
             {
                 MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
                                  "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsProcessing = false;
             }
         }
 
@@ -276,14 +309,17 @@ namespace ExcelAppCR.ViewModel
                 _pageCache[PageIndex] = dataTable;
                 ExcelData = dataTable.DefaultView;
                 RefreshPaging();
-                CurrentState = ViewState.DataLoaded;
 
             }
             catch (Exception ex)
             {
                 CurrentState = ViewState.Empty;
-                MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n{ex.Message}",
+                MessageBox.Show($"Lỗi khi đọc file Excel từ Class MainViewModel:\n {ex.Message}",
                                  "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                CurrentState = ViewState.DataLoaded;
             }
 
 
