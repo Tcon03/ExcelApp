@@ -23,38 +23,62 @@
         <Grid Grid.Row="0" >
 
 
-            <StackPanel>
-                <Menu Background="{StaticResource GradientBrush}" 
+            <Menu Background="{StaticResource GradientBrush}" 
                       IsEnabled="{Binding IsNotProcessing}" >
-                    <MenuItem 
+                <MenuItem 
                          FontFamily="/Fonts/Roboto.ttf#Roboto Black"
                          Header="_File"
                          Foreground="White"
                          Style="{StaticResource MenuItemStyle}">
-                        <MenuItem 
+                    <MenuItem 
                              Header="_New"
                              Foreground="Black"
                              Command="{Binding NewFile}" 
                              CommandParameter="{Binding ElementName=_this}"
                              />
-                        <MenuItem 
+                    <MenuItem 
                              Header="_Open"
                              Foreground="Black"
                              CommandParameter="{Binding ElementName=_this}"
                              Command="{Binding OpenExcelCommand}"/>
 
-                        <MenuItem 
+                    <MenuItem 
                              Header="_Save"
                              Foreground="Black"
                              Command="{Binding SaveFileCommand}"
                              CommandParameter="{Binding ElementName=_this}" />
-                        <Separator/>
-                        <MenuItem Header="E_xit" 
+                    <Separator/>
+                    <MenuItem Header="E_xit" 
                                   Foreground="Black"/>
 
-                    </MenuItem>
-                </Menu>
-            </StackPanel>
+                </MenuItem>
+            </Menu>
+            <Button VerticalAlignment="Center" 
+                    Style="{StaticResource BtnOpen}"
+                    Height="30"
+                    Command="{Binding AddRowCommand}"
+                    CommandParameter="_this"
+                    Margin="0 0 10 0"
+                    Width="120"
+                    Background="#FF7A59"
+                    HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center">
+
+                    <Icon:PackIconMaterial Kind="Plus" 
+                                       Width="15" 
+                                       Margin="0 2 10 0"
+                                       Height="20" 
+                                       Foreground="White"/>
+                    <TextBlock FontWeight="Medium"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               FontSize="15"
+                               HorizontalAlignment="Center"
+                               Text="Add Rows"/>
+                </StackPanel>
+            </Button>
+
         </Grid>
         <!--<Separator Grid.Row="0" 
                    Margin="10 40 10 0"/>-->
