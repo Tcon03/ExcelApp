@@ -10,55 +10,236 @@
         xmlns:viewModel="clr-namespace:ExcelAppCR.ViewModel"
         mc:Ignorable="d"
         Icon="/Images/1excel.png"
-        Title="ExcelApp" Height="720" Width="1280">
+        Title="Excel App" Height="720" Width="1280">
     <Window.DataContext>
         <viewModel:MainViewModel/>
     </Window.DataContext>
-    <Grid>
+
+
+    <!--Item main-->
+    <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
+
+
+        <!--ITEM 1-->
         <Grid Grid.Row="0" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <StackPanel
+                         Orientation="Horizontal" 
+                         Margin="10"
+                         HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding FilePathEx, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
+                                   FontSize="18"
+                                   Margin="0 -3 0 0"
+                                     FontFamily="Segoe UI"
+                                     VerticalAlignment="Center"/>
+                        <Icon:PackIconBootstrapIcons Kind="Table" 
+                                    Width="20" 
+                                    Height="20" 
+                                    VerticalAlignment="Center"
+                                    Margin="15 0  "/>
+                    </StackPanel>
+
+                    <Button HorizontalAlignment="Left"
+                             Foreground="White"
+                             Click="btn_Menu"
+                             Style="{StaticResource btnFile}">
+
+                        <StackPanel Orientation="Horizontal">
+                            <Icon:PackIconBootstrapIcons
+                                 Kind="FileArrowDownFill" 
+                                Width="15" 
+                                Height="15" 
+                                VerticalAlignment="Center"/>
+                            <TextBlock Text=" File"
+                                    VerticalAlignment="Center"
+                                    FontWeight="Bold"
+                                    Margin="5 0 0 0"/>
+                            <Icon:PackIconMaterial
+                                 Kind="ChevronDown" 
+                                 Width="10" 
+                                 Height="15" 
+                                 VerticalAlignment="Center"
+                                 Margin="10 5 0 0"/>
+                        </StackPanel>
+                        <Button.ContextMenu>
+                            <ContextMenu FontSize="15" 
+                                         Margin="5" 
+                                         FontWeight="Medium" >
+
+                                <MenuItem 
+                                        Header="_New"
+                                        Foreground="Black"
+                                        Command="{Binding NewFile}" 
+                                        CommandParameter="{Binding ElementName=_this}">
+                                </MenuItem>
+                                <MenuItem 
+                                        Header="_Open"
+                                        Foreground="Black"
+                                        CommandParameter="{Binding ElementName=_this}"
+                                        Command="{Binding OpenExcelCommand}"/>
+
+                                <MenuItem 
+                                        Header="_Save"
+                                        Foreground="Black"
+                                        Command="{Binding SaveFileCommand}"
+                                        CommandParameter="{Binding ElementName=_this}" />
+                                <Separator/>
+                                <MenuItem Header="E_xit" 
+                                          Foreground="Black"/>
 
 
-            <StackPanel>
-                <Menu Background="{StaticResource GradientBrush}" 
-                      IsEnabled="{Binding IsNotProcessing}" >
-                    <MenuItem 
+                            </ContextMenu>
+                        </Button.ContextMenu>
+
+                    </Button>
+                </Grid>
+
+                <!--ITEM 2-->
+                <Border 
+                         Grid.Row="1"
+                         BorderThickness="1"
+                         BorderBrush="LightGray">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+
+                            <Button  Style="{StaticResource btnNP}"
+                                     Margin="15 0"
+                                      IsEnabled="{Binding IsNotProcessing}"
+                                     Foreground="#14213D"
+                                    CommandParameter="{Binding ElementName=_this}"
+                                    Command="{Binding SaveFileCommand}">
+                                <Icon:PackIconMaterial Kind="ContentSaveOutline"
+                                                       Height="30"
+                                                       Width="20"/>
+                            </Button>
+
+                            <Button
+                                    Foreground="#14213D"
+                                    Style="{StaticResource btnNP}">
+                                <Icon:BootstrapIcons Kind="ArrowLeftShort" 
+                                             Width="20" 
+                                             Height="30" />
+                            </Button>
+
+                            <Button Style="{StaticResource btnNP}"
+                                    Foreground="#14213D">
+                                <Icon:BootstrapIcons Kind="ArrowRightShort" 
+                                             Width="20" 
+                                             Height="30" />
+
+                            </Button>
+
+                            <Border Width="1" 
+                                    Margin="10 10" 
+                                    Background="LightGray"/>
+
+                            <Button Style="{StaticResource baseButton}"
+                                     Command="{Binding AddRowCommand}"
+                                      IsEnabled="{Binding IsNotProcessing}"
+                                     CommandParameter="_this">
+                                <StackPanel Orientation="Horizontal">
+                                    <Icon:PackIconBootstrapIcons
+                                             Kind="plus" 
+                                             Width="10" 
+                                             Height="15" 
+                                             VerticalAlignment="Center"
+                                             Margin="0 2 10 0"/>
+                                    <TextBlock Text="Row"
+                                               FontSize="17"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource baseButton}"
+                                     IsEnabled="{Binding IsNotProcessing}"
+                                    Width="100">
+                                <StackPanel Orientation="Horizontal">
+                                    <Icon:PackIconBootstrapIcons
+                                          Kind="plus" 
+                                          Width="10" 
+                                          Height="15" 
+                                          VerticalAlignment="Center"
+                                          Margin="0 2 10 0"/>
+                                    <TextBlock Text="Column"
+                                               FontSize="17"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!--<Menu Background="White"
+                 IsEnabled="{Binding IsNotProcessing}" >
+                <MenuItem 
                          FontFamily="/Fonts/Roboto.ttf#Roboto Black"
                          Header="_File"
-                         Foreground="White"
                          Style="{StaticResource MenuItemStyle}">
-                        <MenuItem 
+                    <MenuItem 
                              Header="_New"
                              Foreground="Black"
                              Command="{Binding NewFile}" 
                              CommandParameter="{Binding ElementName=_this}"
                              />
-                        <MenuItem 
+                    <MenuItem 
                              Header="_Open"
                              Foreground="Black"
                              CommandParameter="{Binding ElementName=_this}"
                              Command="{Binding OpenExcelCommand}"/>
 
-                        <MenuItem 
+                    <MenuItem 
                              Header="_Save"
                              Foreground="Black"
                              Command="{Binding SaveFileCommand}"
                              CommandParameter="{Binding ElementName=_this}" />
-                        <Separator/>
-                        <MenuItem Header="E_xit" 
+                    <Separator/>
+                    <MenuItem Header="E_xit" 
                                   Foreground="Black"/>
 
-                    </MenuItem>
-                </Menu>
-            </StackPanel>
+                </MenuItem>
+            </Menu>-->
+            <!--<Button VerticalAlignment="Center" 
+                    Style="{StaticResource BtnOpen}"
+                    Height="30"
+                    Command="{Binding AddRowCommand}"
+                    CommandParameter="_this"
+                    Margin="0 0 10 0"
+                    Width="120"
+                    Background="#FF7A59"
+                    HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center">
+
+                    <Icon:PackIconMaterial Kind="Plus" 
+                                       Width="15" 
+                                       Margin="0 2 10 0"
+                                       Height="20" 
+                                       Foreground="White"/>
+                    <TextBlock FontWeight="Medium"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               FontSize="15"
+                               HorizontalAlignment="Center"
+                               Text="Add Rows"/>
+                </StackPanel>
+            </Button>-->
+
         </Grid>
         <!--<Separator Grid.Row="0" 
                    Margin="10 40 10 0"/>-->
 
+        <!--ITEM 3-->
         <Grid Grid.Row="1">
             <userContol:ExcelUser/>
         </Grid>

@@ -11,6 +11,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Documents;
 
 namespace ExcelAppCR.Service
 {
@@ -167,6 +169,41 @@ namespace ExcelAppCR.Service
                     }
                 }
 
+            });
+        }
+        public async Task SaveAsToFile(DataTable dataTable, string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                MessageBox.Show("Chưa có đường dẫn để lưu , vui lòng save lại !!", "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            await Task.Run(() =>
+            {
+                try
+                {
+
+                    var fi = new FileInfo(filePath);
+                    if (fi.Exists) fi.Delete();
+
+                    using (var pkg = new ExcelPackage())
+                    {
+                        var ws = pkg.Workbook.Worksheets.Add("Sheet1");
+                        // header
+                        for (int c = 0; c < dataTable.Columns.Count; c++)
+                            ws.Cells[1, c + 1].Value = dataTable.Columns[c].ColumnName;
+                        // data
+                        for (int r = 0; r < dataTable.Rows.Count; r++)
+                            for (int c = 0; c < dataTable.Columns.Count; c++)
+                                ws.Cells[r + 2, c + 1].Value = dataTable.Rows[r][c];
+                        pkg.SaveAs(fi);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error saving As to Excel file: {Message}", ex.Message);
+                }
             });
         }
     }

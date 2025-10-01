@@ -1,17 +1,80 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+
+
+
+    <!--btn add style-->
+    <Style TargetType="Button" x:Key="baseButton" >
+        <Setter Property="Background" Value="#e2e8f0"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="Width" Value="100"/>
+        <Setter Property="MinHeight" Value="35"/>
+        <Setter Property="Margin" Value="10 5 "/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border BorderBrush="LightGray"
+                         Background="{TemplateBinding Background}" 
+                         BorderThickness="0" 
+                         CornerRadius="5">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#f1f3f5"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#e9ecef"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray"/>
+                <Setter Property="BorderBrush" Value="Gray"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--btn file style-->
+    <Style TargetType="Button" BasedOn="{StaticResource baseButton}" x:Key="btnFile">
+        <Setter Property="Background" Value="#4f46e5" />
+        <Setter Property="Width" Value="120" />
+        <Setter Property="Height" Value="40" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#4338ca" />
+            </Trigger>
+
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#3730a3" />
+            </Trigger>
+
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray" />
+                <Setter Property="BorderBrush" Value="Gray" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
+    <!--btn next prev style-->
     <Style TargetType="Button" x:Key="btnNP">
         <Setter Property="BorderThickness"
                 Value="0"/>
         <Setter Property="Background" 
-                Value="LightGray"/>
+                Value="#e9ecef"/>
+        <Setter Property="Foreground" 
+                Value="Gray"/>
         <Setter Property="Width" 
                 Value="30"/> 
         <Setter Property="Height" 
                 Value="30"/> 
-        <Setter Property="BorderBrush" 
-                Value="Transparent"/> 
         <Setter Property="Margin" 
                 Value="5"/>
         <Setter Property="Template">
@@ -27,11 +90,57 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#21A366"/>
+                <Setter Property="Background" Value="#f1f3f5"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="#1E8449"/>
+                <Setter Property="Background" Value="#e9ecef"/>
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <!--btn open style-->
+    <Style TargetType="Button" x:Key="BtnOpen">
+        <Setter Property="FontSize"
+                Value="17"/>
+        <Setter Property="Height"
+                Value="40"/>
+        <Setter Property="Width"
+                Value="150"/>
+        <Setter Property="Background"
+                Value="#4C6EF5"/>
+        <Setter Property="BorderThickness"
+                Value="0"/>
+        <Setter Property="Cursor"
+                Value="Hand"/>
+        <Setter Property="FontWeight" 
+                Value="Medium" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                          BorderThickness="{TemplateBinding BorderThickness}" 
+                          CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"
+                                 Value="True">
+                            <Setter Property="Background"
+                                  Value="#634BD4"/>
+                            <Setter Property="Foreground"
+                                  Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" 
+                                  Value="#364FC7"/>
+                            <Setter Property="Foreground"
+                                  Value="White"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
