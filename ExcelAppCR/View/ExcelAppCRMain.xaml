@@ -10,25 +10,140 @@
         xmlns:viewModel="clr-namespace:ExcelAppCR.ViewModel"
         mc:Ignorable="d"
         Icon="/Images/1excel.png"
-        Title="ExcelApp" Height="720" Width="1280">
+        Title="Excel App" Height="720" Width="1280">
     <Window.DataContext>
         <viewModel:MainViewModel/>
     </Window.DataContext>
-    <Grid>
+    <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
+        
         <Grid Grid.Row="0" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <StackPanel
+                         Orientation="Horizontal" 
+                         Margin="10"
+                         HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding FilePathEx, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
+                                     FontSize="18"
+                                   Margin="0 -3 0 0"
+                                     FontFamily="Segoe UI"
+                                     VerticalAlignment="Center"/>
+                        <Icon:PackIconBootstrapIcons Kind="Table" 
+                                    Width="20" 
+                                    Height="20" 
+                                    VerticalAlignment="Center"
+                                    Margin="15 0  "/>
+                    </StackPanel>
 
 
-            <Menu Background="{StaticResource GradientBrush}" 
-                      IsEnabled="{Binding IsNotProcessing}" >
+                    <Button HorizontalAlignment="Left"
+                             Foreground="White"
+                             Click="btn_Menu"
+                             Style="{StaticResource btnFile}">
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <Icon:PackIconBootstrapIcons
+                                 Kind="FileArrowDownFill" 
+                                Width="15" 
+                                Height="15" 
+                                VerticalAlignment="Center"/>
+                            <TextBlock Text=" File"
+                                    VerticalAlignment="Center"
+                                    FontWeight="Bold"
+                                    Margin="5 0 0 0"/>
+                            <Icon:PackIconMaterial
+                                 Kind="ChevronDown" 
+                                 Width="10" 
+                                 Height="15" 
+                                 VerticalAlignment="Center"
+                                 Margin="10 5 0 0"/>
+                        </StackPanel>
+                        <Button.ContextMenu>
+                            <ContextMenu FontSize="15" 
+                                         Margin="5" 
+                                         FontWeight="Medium" >
+
+                                <MenuItem 
+                                        Header="_New"
+                                        Foreground="Black"
+                                        Command="{Binding NewFile}" 
+                                        CommandParameter="{Binding ElementName=_this}">
+                                </MenuItem>
+                                <MenuItem 
+                                        Header="_Open"
+                                        Foreground="Black"
+                                        CommandParameter="{Binding ElementName=_this}"
+                                        Command="{Binding OpenExcelCommand}"/>
+
+                                <MenuItem 
+                                        Header="_Save"
+                                        Foreground="Black"
+                                        Command="{Binding SaveFileCommand}"
+                                        CommandParameter="{Binding ElementName=_this}" />
+                                <Separator/>
+                                <MenuItem Header="E_xit" 
+                                          Foreground="Black"/>
+
+
+                            </ContextMenu>
+                        </Button.ContextMenu>
+
+                    </Button>
+                </Grid>
+
+
+                <Border 
+                         Grid.Row="1"
+                         BorderThickness="1"
+                         BorderBrush="LightGray">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource baseButton}"
+                                     Command="{Binding AddRowCommand}"
+                                     CommandParameter="_this">
+                                <StackPanel Orientation="Horizontal">
+                                    <Icon:PackIconBootstrapIcons
+                                             Kind="plus" 
+                                             Width="10" 
+                                             Height="15" 
+                                             VerticalAlignment="Center"
+                                             Margin="0 2 10 0"/>
+                                    <TextBlock Text="Row"
+                                                VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource baseButton}"
+                                    Width="100">
+                                <StackPanel Orientation="Horizontal">
+                                    <Icon:PackIconBootstrapIcons
+                                          Kind="plus" 
+                                          Width="10" 
+                                          Height="15" 
+                                          VerticalAlignment="Center"
+                                          Margin="0 2 10 0"/>
+                                    <TextBlock Text="Column"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!--<Menu Background="White"
+                 IsEnabled="{Binding IsNotProcessing}" >
                 <MenuItem 
                          FontFamily="/Fonts/Roboto.ttf#Roboto Black"
                          Header="_File"
-                         Foreground="White"
                          Style="{StaticResource MenuItemStyle}">
                     <MenuItem 
                              Header="_New"
@@ -52,8 +167,8 @@
                                   Foreground="Black"/>
 
                 </MenuItem>
-            </Menu>
-            <Button VerticalAlignment="Center" 
+            </Menu>-->
+            <!--<Button VerticalAlignment="Center" 
                     Style="{StaticResource BtnOpen}"
                     Height="30"
                     Command="{Binding AddRowCommand}"
@@ -77,7 +192,7 @@
                                HorizontalAlignment="Center"
                                Text="Add Rows"/>
                 </StackPanel>
-            </Button>
+            </Button>-->
 
         </Grid>
         <!--<Separator Grid.Row="0" 

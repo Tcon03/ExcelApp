@@ -33,6 +33,16 @@ namespace ExcelAppCR.ViewModel
     {
 
         private string _filePath;
+        public string FilePathEx
+        {
+            get { return _filePath; }
+            set
+            {
+                _filePath = value; 
+                Log.Information("File Path :" + _filePath);
+                RaisePropertyChanged(nameof(FilePathEx));
+            }
+        }
 
         private DataView _dataView;
         public DataView ExcelData
@@ -163,7 +173,7 @@ namespace ExcelAppCR.ViewModel
                 PageIndex = 1;
                 _listChange.Clear();
                 _pageCache.Clear();
-                _filePath = string.Empty;
+                FilePathEx = string.Empty;
                 RefreshPaging();
             }
             catch (Exception ex)
@@ -223,7 +233,7 @@ namespace ExcelAppCR.ViewModel
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(_filePath))
+                if (string.IsNullOrWhiteSpace(FilePathEx))
                 {
                     await SaveNewFileAsync();
                     return;
@@ -255,12 +265,12 @@ namespace ExcelAppCR.ViewModel
                 if (saveFileDialog.ShowDialog() != true)
                     return;
                 IsSaved = true;
-                _filePath = saveFileDialog.FileName;
+                FilePathEx = saveFileDialog.FileName;
                 DataTable data = ExcelData.ToTable();
-                await _excelService.SaveAsToFile(data, _filePath);
+                await _excelService.SaveAsToFile(data, FilePathEx);
                 _listChange.Clear();
                 _pageCache.Clear();
-                MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"File saved successfully to:\n{FilePathEx}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -341,11 +351,11 @@ namespace ExcelAppCR.ViewModel
             if (openFileDialog.ShowDialog() != true)
                 return;
             IsProcessing = true;
-            _filePath = openFileDialog.FileName;
+            FilePathEx = openFileDialog.FileName;
             try
             {
                 CurrentState = ViewState.Loading;
-                TotalRecords = (int)await Task.Run(() => _excelService.GetTotalRowCount(_filePath));
+                TotalRecords = (int)await Task.Run(() => _excelService.GetTotalRowCount(FilePathEx));
                 Log.Information("Total Record :" + TotalRecords);
                 TotalPages = (int)Math.Ceiling((double)TotalRecords / PageSize);
                 await LoadPageData();
@@ -367,7 +377,7 @@ namespace ExcelAppCR.ViewModel
         public async Task LoadPageData()
         {
             CurrentState = ViewState.Loading;
-            
+
             if (_pageCache.ContainsKey(PageIndex))
             {
                 ExcelData = _pageCache[PageIndex].DefaultView;
@@ -378,7 +388,7 @@ namespace ExcelAppCR.ViewModel
             }
             try
             {
-                var dataTable = await Task.Run(() => _excelService.LoadExcelPage(_filePath, PageIndex, PageSize));
+                var dataTable = await Task.Run(() => _excelService.LoadExcelPage(FilePathEx, PageIndex, PageSize));
                 // lưu vào cache
                 _pageCache[PageIndex] = dataTable;
                 ExcelData = dataTable.DefaultView;

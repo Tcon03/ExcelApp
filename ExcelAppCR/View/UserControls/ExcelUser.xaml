@@ -187,7 +187,7 @@
                         <Style TargetType="DataGridCell">
                             <Setter Property="Padding" Value="5,3"/>
                             <Setter Property="FontSize" Value="15"/>
-                            <Setter Property="MinHeight" Value="30"/>
+                            <Setter Property="MinHeight" Value="35"/>
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#E8F5E8"/>
@@ -224,7 +224,7 @@
                         <Button Command="{Binding OpenExcelCommand}"
                                 Style="{StaticResource BtnOpen}"
                                 CommandParameter="{Binding ElementName=root}">
-                            
+
                             <StackPanel Orientation="Horizontal">
                                 <Icon:PackIconBootstrapIcons 
                                         Kind="Folder2Open" 
@@ -256,9 +256,12 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="1">
+        <Border Grid.Row="1"
+                BorderThickness="1"
+                BorderBrush="LightGray">
+            <Grid>
 
-            <TextBlock HorizontalAlignment="Left" 
+                <TextBlock HorizontalAlignment="Left" 
                        Margin="10 0"
                        FontFamily="/Fonts/Nexa.ttf#Nexa"
                        FontWeight="Bold"
@@ -267,75 +270,77 @@
                        FontSize="18">
                      <Run Text="Total Record :"/>
                      <Run Text="{Binding TotalRecords, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
-            </TextBlock>
+                </TextBlock>
 
-            <StackPanel HorizontalAlignment="Right"
+                <StackPanel HorizontalAlignment="Right"
                         Margin="10 5 15 5"
                         Orientation="Horizontal">
-                <Border  Visibility="{Binding IsSaved, Converter={StaticResource BoolVisibility}}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock  Text="📊 Save File :" 
+                    <Border  Visibility="{Binding IsSaved, Converter={StaticResource BoolVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock  Text="📊 Save File :" 
                                     FontWeight="Bold"
                                     FontSize="15"
                                     FontFamily="/Fonts/Nexa.ttf#Nexa"
                                     VerticalAlignment="Center"
                                     Margin="0,0,10,0"/>
 
-                        <ProgressBar Height="20" 
+                            <ProgressBar Height="20" 
                                     Margin="0 0 50 0" 
                                     VerticalAlignment="Center"
                                     Foreground="Green"
                                     IsIndeterminate="True"
                                     Background="Azure"
                                     Width="200"/>
-                    </StackPanel>
-                </Border>
+                        </StackPanel>
+                    </Border>
 
 
-                <TextBlock Text="Page Size :" 
+                    <TextBlock Text="Page Size :" 
                            FontSize="18"
-                           FontWeight="Bold"
-                            Foreground="#212529"
-                           FontFamily="/Fonts/Nexa.ttf#Nexa"
+                           FontWeight="DemiBold"
+                           Foreground="#212529"
+                           FontFamily="Segoe UI"
                            Margin="0 0 15 2"
                            VerticalAlignment="Center"/>
-                <ComboBox Width="80" 
+                    <ComboBox Width="80" 
                           Height="25"
                           FontWeight="Bold"
-                           Foreground="#212529"
+                          Foreground="#212529"
                           ItemsSource="{Binding PageSizeOptions}"
                           IsEnabled="{Binding IsNotProcessing}"
                           SelectedItem="{Binding PageSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Margin="0,0,20,0">
+                    </ComboBox>
 
-                </ComboBox>
-                <Button Style="{StaticResource btnNP }"
-                        IsEnabled="{Binding IsNotProcessing}"
-                        Command="{Binding PreviousPageCommand}"
-                        CommandParameter="{Binding ElementName=root}">
-                    <Image Source="/Images/backP.png"
-                           Margin="5"/>
-                </Button>
-                <TextBlock 
-                        FontWeight="Bold"
+                    <Button Style="{StaticResource btnNP }"
+                            IsEnabled="{Binding IsNotProcessing}"
+                            Command="{Binding PreviousPageCommand}"
+                            CommandParameter="{Binding ElementName=root}">
+                        <Icon:PackIconMaterial Kind="ChevronLeft" 
+                                                VerticalAlignment="Center"/>
+                    </Button>
+                    <TextBlock 
                         FontSize="20"
+                        FontFamily="Segoe UI"
                         VerticalAlignment="Center">
                     <Run Text="{Binding PageIndex , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
                     <Run Text="/"/> 
                     <Run Text="{Binding TotalPages , Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
-                </TextBlock>
-                <Button Style="{StaticResource btnNP}"
-                        Command="{Binding NextPageCommand }" 
-                        IsEnabled="{Binding IsNotProcessing}"
-                        CommandParameter="{Binding ElementName=root}">
-                    <Image Source="/Images/nextP.png"
-                           Margin="5"/>
-                </Button>
+                    </TextBlock>
 
-            </StackPanel>
+                    <Button Style="{StaticResource btnNP}"
+                            Command="{Binding NextPageCommand }" 
+                            IsEnabled="{Binding IsNotProcessing}"
+                            CommandParameter="{Binding ElementName=root}">
+                        <Icon:PackIconMaterial Kind="ChevronRight" 
+                                        VerticalAlignment="Center"/>
 
+                    </Button>
 
-        </Grid>
+                </StackPanel>
+
+            </Grid>
+        </Border>
         <!--<Separator Margin="10 0 10 -700"/>-->
 
     </Grid>
