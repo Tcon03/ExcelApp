@@ -37,7 +37,7 @@
                                     <Path.Data>
                                         <PathGeometry>
                                             <PathFigure StartPoint="45,25">
-                                                <!-- Cung 270°  khi quay -->
+                                                <!-- Cung khi quay -->
                                                 <ArcSegment Size="20,20"
                                                     Point="25,5"
                                                     IsLargeArc="True"
@@ -48,7 +48,6 @@
                                 </Path>
                             </Grid>
 
-                            <!-- Nhãn trạng thái -->
                             <TextBlock Text="Đang tải dữ liệu..."
                                FontSize="14"
                                Foreground="#4A5568"
@@ -67,12 +66,7 @@
                                         Storyboard.TargetName="Spinner"
                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
                                         From="0" To="360" Duration="0:0:1"/>
-                                            <!-- target trực tiếp vào RotateTransform
-                                    <DoubleAnimation
-                                        Storyboard.TargetName="SpinnerRotate"
-                                        Storyboard.TargetProperty="Angle"
-                                        From="0" To="360" Duration="0:0:1" />
-                                    -->
+
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -144,13 +138,15 @@
 
     <Grid Margin="0" 
           Background="#FFFFFF">
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
+        
+        
+        <!--Item 1--> 
         <Grid Grid.Row="0">
-
-
             <Border Margin="10"
                     BorderThickness="2"
                     BorderBrush="LightGray"
@@ -256,8 +252,11 @@
             </Border>
         </Grid>
 
+        
+        <!--Item 2-->
         <Border Grid.Row="1"
                 BorderThickness="1"
+                Margin="0 5 0 0"
                 BorderBrush="LightGray">
             <Grid>
 
@@ -315,12 +314,15 @@
                     <Button Style="{StaticResource btnNP }"
                             IsEnabled="{Binding IsNotProcessing}"
                             Command="{Binding PreviousPageCommand}"
+                            Margin="0 0 0 -2"
                             CommandParameter="{Binding ElementName=root}">
                         <Icon:PackIconMaterial Kind="ChevronLeft" 
+                                               Height="20"
                                                 VerticalAlignment="Center"/>
                     </Button>
                     <TextBlock 
-                        FontSize="20"
+                        FontSize="20" 
+                        Margin="5 0 5 0"
                         FontFamily="Segoe UI"
                         VerticalAlignment="Center">
                     <Run Text="{Binding PageIndex , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
@@ -331,9 +333,11 @@
                     <Button Style="{StaticResource btnNP}"
                             Command="{Binding NextPageCommand }" 
                             IsEnabled="{Binding IsNotProcessing}"
+                            Margin="0 0 0 -2"
                             CommandParameter="{Binding ElementName=root}">
                         <Icon:PackIconMaterial Kind="ChevronRight" 
-                                        VerticalAlignment="Center"/>
+                                               Height="20"
+                                               VerticalAlignment="Center"/>
 
                     </Button>
 
@@ -341,7 +345,6 @@
 
             </Grid>
         </Border>
-        <!--<Separator Margin="10 0 10 -700"/>-->
 
     </Grid>
 

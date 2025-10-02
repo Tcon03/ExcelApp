@@ -31,7 +31,7 @@ namespace ExcelAppCR.Service
         /// <param name="pageIndex"> số thứ tự page muốn lấy </param>
         /// <param name="pageSize"> Kích thước của mỗi page 100 ,1000 </param>
         /// <returns> dataTable chứa dữ liệu</returns>
-        public DataTable LoadExcelPage(string filePath, int pageIndex, int pageSize)
+        public DataTable LoadExcelPage(string filePath, int pageIndex, int pageSize )
         {
             try
             {
@@ -58,12 +58,13 @@ namespace ExcelAppCR.Service
                     var totalCol = worksheet.Dimension.Columns;
                     Log.Information("Total Columns in Excel: {ColCount}", totalCol);
 
-
+                    //Đọc và thêm các cột GỐC từ file Excel
                     for (int colI = 1; colI <= totalCol; colI++)
                     {
                         dataTable.Columns.Add(worksheet.Cells[1, colI].Value?.ToString() ?? $"Col{colI}");
                     }
 
+                  
                     //5. Tính toán vị trí hàng bắt đầu và kết thúc của trang hiện tại
                     var startRow = (pageIndex - 1) * pageSize + 2;
                     Log.Information("Loading Page {PageIndex}, Start Row: {StartRow}", pageIndex, startRow);
