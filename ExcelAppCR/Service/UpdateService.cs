@@ -62,7 +62,7 @@ namespace ExcelAppCR.Service
                 if (result == MessageBoxResult.Yes)
                 {
                     try
-                    zz
+                    {
                         AutoUpdater.DownloadUpdate(args);
                     }
                     catch (Exception ex)
