@@ -4,6 +4,7 @@ using ExcelAppCR.Service;
 using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using Serilog;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -38,7 +39,7 @@ namespace ExcelAppCR.ViewModel
             get { return _filePath; }
             set
             {
-                _filePath = value; 
+                _filePath = value;
                 Log.Information("File Path :" + _filePath);
                 RaisePropertyChanged(nameof(FilePathEx));
             }
@@ -63,7 +64,6 @@ namespace ExcelAppCR.ViewModel
                 {
                     _dataView.Table.ColumnChanged += OnCellChanged;
                 }
-                Log.Information("ExcelData View :" + _dataView.ToString());
                 RaisePropertyChanged(nameof(ExcelData));
                 RaisePropertyChanged(nameof(HasData));
             }
@@ -77,7 +77,7 @@ namespace ExcelAppCR.ViewModel
         // lưu các trang lại sau khi next hoặc previous để không phải load lại từ file
         private Dictionary<int, DataTable> _pageCache = new Dictionary<int, DataTable>();
 
-
+        private readonly List<string> _addedColumns = new List<string>();
 
         private ViewState _currentState = ViewState.Empty; // Trạng thái ban đầu
         public ViewState CurrentState
@@ -101,16 +101,71 @@ namespace ExcelAppCR.ViewModel
         public ICommand SaveFileCommand { get; set; }
         public ICommand NewFile { get; set; }
         public ICommand AddRowCommand { get; set; }
-        public async Task InitData()
+        public ICommand AddColumnCommand { get; set; }
+        public void InitData()
         {
             _excelService = new ExcelService();
             OpenExcelCommand = new VfxCommand(OnOpen, () => true);
             SaveFileCommand = new VfxCommand(OnSave, () => true);
             NewFile = new VfxCommand(OnNewFile, () => true);
             AddRowCommand = new VfxCommand(OnAddRow, () => true);
+            AddColumnCommand = new VfxCommand(OnAddColumn, () => true);
             CurrentState = ViewState.Empty;
         }
 
+        private void OnAddColumn(object obj)
+        {
+            if (!HasData)
+            {
+                MessageBox.Show("Chưa có dữ liệu để thêm cột! Vui lòng tạo file mới", "Warning",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                string newColumnName = Interaction.InputBox("Enter new column name:", "Add Column",
+                                                            $"NewColumn{_addedColumns.Count + 1}");
+                if (string.IsNullOrWhiteSpace(newColumnName))
+                    return;
+
+                _addedColumns.Add(newColumnName);
+
+                // cập nhật cache
+                foreach (var table in _pageCache.Values)
+                    if (!table.Columns.Contains(newColumnName))
+                        table.Columns.Add(newColumnName, typeof(string));
+
+                // cập nhật bảng hiện tại
+                var currentTable = ExcelData.Table;
+                if (!currentTable.Columns.Contains(newColumnName))
+                {
+                    currentTable.Columns.Add(newColumnName, typeof(string));
+                    foreach (DataRow r in currentTable.Rows) r[newColumnName] = "";
+                }
+
+                // ép DataGrid refresh schema
+                ExcelData = null;
+                ExcelData = new DataView(currentTable);
+
+                // schema thay đổi -> dọn state
+                _listChange.Clear();
+                _pageCache.Clear();
+
+                RefreshPaging();
+                Log.Information("Added new column: {ColumnName}", newColumnName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi thêm cột:\n{ex.Message}", "Lỗi",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        /// <summary>
+        /// Add new row to DataTable
+        /// </summary>
         private void OnAddRow(object obj)
         {
             if (!HasData)
@@ -157,14 +212,13 @@ namespace ExcelAppCR.ViewModel
             try
             {
                 var table = new DataTable();
-                for (int i = 1; i <= 10; i++)
-                {
-                    table.Columns.Add($"Column {i}", typeof(string));
-                }
+                for (int i = 1; i <= 10; i++) table.Columns.Add($"Column {i}", typeof(string));
 
                 for (int i = 0; i < 20; i++)
                 {
-                    table.Rows.Add("", "", "");
+                    var row = table.NewRow();
+                    foreach (DataColumn col in table.Columns) row[col] = "";
+                    table.Rows.Add(row);
                 }
 
                 ExcelData = table.DefaultView;
@@ -291,6 +345,7 @@ namespace ExcelAppCR.ViewModel
                 await _excelService.SaveToFile(_filePath, _listChange);
                 _listChange.Clear();
                 _pageCache.Clear();
+                _addedColumns.Clear();
                 MessageBox.Show($"File saved successfully to:\n{_filePath}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -342,6 +397,7 @@ namespace ExcelAppCR.ViewModel
         {
             _listChange.Clear();
             _pageCache.Clear();
+            _addedColumns.Clear();
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Title = "Select Excel File",

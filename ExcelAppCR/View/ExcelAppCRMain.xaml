@@ -55,7 +55,7 @@
 
                         <StackPanel Orientation="Horizontal">
                             <Icon:PackIconBootstrapIcons
-                                 Kind="FileArrowDownFill" 
+                                Kind="FileArrowDownFill" 
                                 Width="15" 
                                 Height="15" 
                                 VerticalAlignment="Center"/>
@@ -79,19 +79,18 @@
                                         Header="_New"
                                         Foreground="Black"
                                         Command="{Binding NewFile}" 
-                                        CommandParameter="{Binding ElementName=_this}">
+                                       >
                                 </MenuItem>
                                 <MenuItem 
                                         Header="_Open"
                                         Foreground="Black"
-                                        CommandParameter="{Binding ElementName=_this}"
                                         Command="{Binding OpenExcelCommand}"/>
 
                                 <MenuItem 
                                         Header="_Save"
                                         Foreground="Black"
                                         Command="{Binding SaveFileCommand}"
-                                        CommandParameter="{Binding ElementName=_this}" />
+                                        />
                                 <Separator/>
                                 <MenuItem Header="E_xit" 
                                           Foreground="Black"/>
@@ -160,6 +159,8 @@
                             </Button>
 
                             <Button Style="{StaticResource baseButton}"
+                                    Command="{Binding AddColumnCommand}" 
+                                    CommandParameter="{Binding ElementName=_this}"
                                      IsEnabled="{Binding IsNotProcessing}"
                                     Width="100">
                                 <StackPanel Orientation="Horizontal">

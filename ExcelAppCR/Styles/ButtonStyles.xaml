@@ -68,7 +68,7 @@
         <Setter Property="BorderThickness"
                 Value="0"/>
         <Setter Property="Background" 
-                Value="#e9ecef"/>
+                Value="Transparent"/>
         <Setter Property="Foreground" 
                 Value="Gray"/>
         <Setter Property="Width" 

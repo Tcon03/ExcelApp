@@ -258,6 +258,7 @@
 
         <Border Grid.Row="1"
                 BorderThickness="1"
+                Margin="0 5 0 0"
                 BorderBrush="LightGray">
             <Grid>
 
@@ -315,12 +316,15 @@
                     <Button Style="{StaticResource btnNP }"
                             IsEnabled="{Binding IsNotProcessing}"
                             Command="{Binding PreviousPageCommand}"
+                            Margin="0 0 0 -2"
                             CommandParameter="{Binding ElementName=root}">
                         <Icon:PackIconMaterial Kind="ChevronLeft" 
+                                               Height="20"
                                                 VerticalAlignment="Center"/>
                     </Button>
                     <TextBlock 
-                        FontSize="20"
+                        FontSize="20" 
+                        Margin="5 0 5 0"
                         FontFamily="Segoe UI"
                         VerticalAlignment="Center">
                     <Run Text="{Binding PageIndex , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
@@ -331,9 +335,11 @@
                     <Button Style="{StaticResource btnNP}"
                             Command="{Binding NextPageCommand }" 
                             IsEnabled="{Binding IsNotProcessing}"
+                            Margin="0 0 0 -2"
                             CommandParameter="{Binding ElementName=root}">
                         <Icon:PackIconMaterial Kind="ChevronRight" 
-                                        VerticalAlignment="Center"/>
+                                               Height="20"
+                                               VerticalAlignment="Center"/>
 
                     </Button>
 
