@@ -138,14 +138,14 @@
 
     <Grid Margin="0" 
           Background="#FFFFFF">
-        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        
-        
-        <!--Item 1--> 
+
+
+        <!--Item 1-->
         <Grid Grid.Row="0">
             <Border Margin="10"
                     BorderThickness="2"
@@ -182,7 +182,9 @@
                     <DataGrid.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Padding" Value="5,3"/>
+                            <Setter Property="Margin" Value="5 0"/>
                             <Setter Property="FontSize" Value="15"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="MinHeight" Value="35"/>
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
@@ -252,7 +254,7 @@
             </Border>
         </Grid>
 
-        
+
         <!--Item 2-->
         <Border Grid.Row="1"
                 BorderThickness="1"
@@ -268,14 +270,26 @@
                        VerticalAlignment="Center"
                        FontSize="18">
                      <Run Text="Total Record :"/>
-                     <Run Text="{Binding TotalRecords, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
+                     <Run Text="{Binding TotalRecords, Mode=OneWay , UpdateSourceTrigger=PropertyChanged ,StringFormat=N0}"/>
                 </TextBlock>
 
                 <StackPanel HorizontalAlignment="Right"
                         Margin="10 5 15 5"
                         Orientation="Horizontal">
+
+                    <TextBlock VerticalAlignment="Center"
+                               Margin="0,0,25,0" 
+                                FontSize="18">
+                          <Run Text="Load Time: "/>
+                          <Run Foreground="Green"
+                               Text="{Binding LastLoadTime, StringFormat={}{0:F0}ms}" 
+                               FontWeight="DemiBold"/>
+                    </TextBlock>
+                    
                     <Border  Visibility="{Binding IsSaved, Converter={StaticResource BoolVisibility}}">
                         <StackPanel Orientation="Horizontal">
+
+
                             <TextBlock  Text="📊 Save File :" 
                                     FontWeight="Bold"
                                     FontSize="15"
@@ -299,7 +313,7 @@
                            FontWeight="DemiBold"
                            Foreground="#212529"
                            FontFamily="Segoe UI"
-                           Margin="0 0 15 2"
+                           Margin="0 0 15 0"
                            VerticalAlignment="Center"/>
                     <ComboBox Width="80" 
                           Height="25"
@@ -307,7 +321,8 @@
                           Foreground="#212529"
                           ItemsSource="{Binding PageSizeOptions}"
                           IsEnabled="{Binding IsNotProcessing}"
-                          SelectedItem="{Binding PageSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding PageSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                           VerticalContentAlignment="Center"
                           Margin="0,0,20,0">
                     </ComboBox>
 

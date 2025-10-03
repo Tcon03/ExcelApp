@@ -45,9 +45,9 @@ namespace ExcelAppCR.Service
                 return;
             }
 
+            // check if it is the latest version then skip
             if (!args.IsUpdateAvailable)
             {
-                // im lặng cho trải nghiệm mượt
                 return;
             }
             _dispatcher.Invoke(() =>

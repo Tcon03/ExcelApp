@@ -68,6 +68,17 @@ namespace ExcelAppCR.ViewModel
                 RaisePropertyChanged(nameof(HasData));
             }
         }
+        private double _lastLoadTime;
+        public double LastLoadTime
+        {
+            get => _lastLoadTime;
+            set
+            {
+                _lastLoadTime = value;
+                Log.Information("LoadTime : " + _lastLoadTime);
+                RaisePropertyChanged(nameof(LastLoadTime));
+            }
+        }
 
         public bool HasData => _dataView != null;
 
@@ -424,6 +435,7 @@ namespace ExcelAppCR.ViewModel
             finally
             {
                 IsProcessing = false;
+
             }
         }
 
@@ -432,6 +444,8 @@ namespace ExcelAppCR.ViewModel
         /// </summary>
         public async Task LoadPageData()
         {
+            LastLoadTime = 0;
+            var stopwatch = Stopwatch.StartNew();
             CurrentState = ViewState.Loading;
 
             if (_pageCache.ContainsKey(PageIndex))
@@ -460,6 +474,8 @@ namespace ExcelAppCR.ViewModel
             finally
             {
                 CurrentState = ViewState.DataLoaded;
+                stopwatch.Stop();
+                LastLoadTime = stopwatch.Elapsed.TotalMilliseconds;
             }
         }
 
