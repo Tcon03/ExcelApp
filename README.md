@@ -9,7 +9,7 @@
 -  Open file  
 -  Add Row  
 -  Add Column  
--  Next - Previous  
+-  Previous - Next
 -  Page Size  
 
 ---
