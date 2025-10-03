@@ -14,7 +14,7 @@ namespace ExcelAppCR.ViewModel
     {
         #region
 
-        public IReadOnlyList<int> PageSizeOptions { get; } = new[] { 500, 1000, 2000, 5000 };
+        public IReadOnlyList<int> PageSizeOptions { get; } = new[] {50 , 500, 1000, 2000, 5000 };
         protected virtual void OnPageSizeChanged(int newSize)
         {
 
