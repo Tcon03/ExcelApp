@@ -21,7 +21,9 @@
 +> MVVM
 
 +> WPF
+
 ----------------- Các thư viện ------------ 
+
 +> MahApps.Metro.IconPacks
 
 +> AutoUpdater.NET` 
