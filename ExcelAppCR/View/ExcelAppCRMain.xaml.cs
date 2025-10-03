@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExcelAppCR.Service;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ namespace ExcelAppCR.View
         public ExcelAppCRMain()
         {
             InitializeComponent();
+            UpdateService.CheckForUpdates();
         }
 
         private void btn_Menu(object sender, RoutedEventArgs e)

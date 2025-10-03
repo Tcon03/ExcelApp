@@ -121,7 +121,7 @@
                                                        Width="20"/>
                             </Button>
 
-                            <Button
+                            <!--<Button
                                     Foreground="#14213D"
                                     Style="{StaticResource btnNP}">
                                 <Icon:BootstrapIcons Kind="ArrowLeftShort" 
@@ -135,7 +135,7 @@
                                              Width="20" 
                                              Height="30" />
 
-                            </Button>
+                            </Button>-->
 
                             <Border Width="1" 
                                     Margin="10 10" 
