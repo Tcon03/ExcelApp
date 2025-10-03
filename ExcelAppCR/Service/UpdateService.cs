@@ -20,6 +20,7 @@ namespace ExcelAppCR.Service
             AutoUpdater.ReportErrors = true;
             AutoUpdater.RunUpdateAsAdmin = false;
             AutoUpdater.Synchronous = false;
+            AutoUpdater.ClearAppDirectory = true;
             //AutoUpdater.InstallationPath = AppDomain.CurrentDomain.BaseDirectory;
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
             AutoUpdater.Start(appCastUrl);
@@ -63,7 +64,10 @@ namespace ExcelAppCR.Service
                 {
                     try
                     {
-                        AutoUpdater.DownloadUpdate(args);
+                        if (AutoUpdater.DownloadUpdate(args))
+                        {
+                            Application.Current.Shutdown();
+                        }
                     }
                     catch (Exception ex)
                     {
