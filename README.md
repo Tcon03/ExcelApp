@@ -1,34 +1,29 @@
-Ứng Dụng Desktop (WPF) Đọc Ghi File Excel 
+# Ứng Dụng Desktop (WPF) Đọc Ghi File Excel
 
------------- Các Tính Năng Chính ------------
+---
 
-+> New file 
+## 🚀 Các Tính Năng Chính
 
-+> Save file 
+-  New file  
+-  Save file  
+-  Open file  
+-  Add Row  
+-  Add Column  
+-  Next - Previous  
+-  Page Size  
 
-+> Open file 
+---
 
-+> Add Row
+## 🛠️ Công Nghệ Sử Dụng
 
-+> Add Column
+- MVVM  
+- WPF  
 
-+> Next - Pervious 
+---
 
-+> Page Size
+## 📦 Các Thư Viện
 
------------- Công Nghệ Sử Dụng ----------
-
-+> MVVM
-
-+> WPF
-
------------------ Các thư viện ------------ 
-
-+> MahApps.Metro.IconPacks
-
-+> AutoUpdater.NET` 
-
-+> EPPlus
-
-+> Serilog
-
+- MahApps.Metro.IconPacks 
+- AutoUpdater.NET
+- EPPlus
+- Serilog  
