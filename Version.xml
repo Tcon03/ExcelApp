@@ -1,7 +1,6 @@
 <item>
-  <version>1.4.0.0</version>
+  <version>1.5.0.0</version>
   <url>https://github.com/Tcon03/ExcelAppCR/releases/latest/download/ExcelApp.zip</url>
-  <executable>ExcelApp\ExcelAppCR.exe</executable>
   <changelog>https://github.com/Tcon03/ExcelAppCR/releases</changelog>
   <mandatory>false</mandatory>
 </item>
