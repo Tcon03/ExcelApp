@@ -78,8 +78,7 @@
                                 <MenuItem 
                                         Header="_New"
                                         Foreground="Black"
-                                        Command="{Binding NewFile}" 
-                                       >
+                                        Command="{Binding NewFile}" >
                                 </MenuItem>
                                 <MenuItem 
                                         Header="_Open"
@@ -89,10 +88,11 @@
                                 <MenuItem 
                                         Header="_Save"
                                         Foreground="Black"
-                                        Command="{Binding SaveFileCommand}"
-                                        />
+                                        Command="{Binding SaveFileCommand}"/>
+
                                 <Separator/>
                                 <MenuItem Header="E_xit" 
+                                          Click="MenuItem_Click"
                                           Foreground="Black"/>
 
 

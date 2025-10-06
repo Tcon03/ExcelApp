@@ -37,5 +37,10 @@ namespace ExcelAppCR.View
             bt.ContextMenu.IsOpen = true;
             e.Handled = true;
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
     }
 }

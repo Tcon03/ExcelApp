@@ -9,12 +9,10 @@ using System.Windows.Threading;
 
 namespace ExcelAppCR.Service
 {
-    public class UpdateService
+    public static class UpdateService
     {
         private const string appCastUrl = "https://raw.githubusercontent.com/Tcon03/ExcelAppCR/refs/heads/master/Version.xml";
-        public UpdateService()
-        {
-        }
+       
         public static void CheckForUpdates()
         {
             AutoUpdater.ReportErrors = true;
