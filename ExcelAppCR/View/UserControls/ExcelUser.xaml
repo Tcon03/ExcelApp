@@ -261,7 +261,6 @@
                 Margin="0 5 0 0"
                 BorderBrush="LightGray">
             <Grid>
-
                 <TextBlock HorizontalAlignment="Left" 
                        Margin="10 0"
                        FontFamily="/Fonts/Nexa.ttf#Nexa"

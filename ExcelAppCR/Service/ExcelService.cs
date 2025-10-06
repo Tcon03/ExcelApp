@@ -41,17 +41,17 @@ namespace ExcelAppCR.Service
                 var fileInfo = new FileInfo(filePath);
                 Log.Information("Getting total row count from file: {FilePath}", filePath);
 
-                //2 . mở file excel và đọc dữ liệu
+                // 2 . mở file excel và đọc dữ liệu
                 using (var package = new ExcelPackage(fileInfo))
                 {
-                    //3. Lấy trang tính đầu tiên
+                    // 3. Lấy trang tính đầu tiên
                     ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
                     Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
 
                     if (worksheet.Dimension == null)
                         return dataTable;
 
-                    //4. Lấy tổng số hàng và cột tạo cho dataTable  
+                    // 4. Lấy tổng số hàng và cột tạo cho dataTable  
                     var totalRows = worksheet.Dimension.Rows;
                     Log.Information("Total Rows in Excel ......: {TotalRows}", totalRows);
 
