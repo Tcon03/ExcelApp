@@ -51,6 +51,7 @@
                     <Button HorizontalAlignment="Left"
                              Foreground="White"
                              Click="btn_Menu"
+                            IsEnabled="{Binding IsNotProcessing}"
                              Style="{StaticResource btnFile}">
 
                         <StackPanel Orientation="Horizontal">

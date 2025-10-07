@@ -68,6 +68,7 @@ namespace ExcelAppCR.ViewModel
                 RaisePropertyChanged(nameof(HasData));
             }
         }
+
         private double _lastLoadTime;
         public double LastLoadTime
         {

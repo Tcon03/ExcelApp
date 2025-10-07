@@ -27,11 +27,7 @@ namespace ExcelAppCR.Service
         /// <summary>
         /// Load file Excel theo trang (pagination)
         /// </summary>
-        /// <param name="filePath"> Đường dẫn của file Excel </param>
-        /// <param name="pageIndex"> số thứ tự page muốn lấy </param>
-        /// <param name="pageSize"> Kích thước của mỗi page 100 ,1000 </param>
-        /// <returns> dataTable chứa dữ liệu</returns>
-        public DataTable LoadExcelPage(string filePath, int pageIndex, int pageSize )
+        public DataTable LoadExcelPage(string filePath, int pageIndex, int pageSize)
         {
             try
             {
@@ -58,14 +54,14 @@ namespace ExcelAppCR.Service
                     var totalCol = worksheet.Dimension.Columns;
                     Log.Information("Total Columns in Excel: {ColCount}", totalCol);
 
-                    //Đọc và thêm các cột GỐC từ file Excel
+                    // 5. Đọc và thêm các cột GỐC từ file Excel
                     for (int colI = 1; colI <= totalCol; colI++)
                     {
                         dataTable.Columns.Add(worksheet.Cells[1, colI].Value?.ToString() ?? $"Col{colI}");
                     }
 
-                  
-                    //5. Tính toán vị trí hàng bắt đầu và kết thúc của trang hiện tại
+
+                    //. Tính toán vị trí hàng bắt đầu và kết thúc của trang hiện tại
                     var startRow = (pageIndex - 1) * pageSize + 2;
                     Log.Information("Loading Page {PageIndex}, Start Row: {StartRow}", pageIndex, startRow);
 
@@ -99,18 +95,21 @@ namespace ExcelAppCR.Service
         /// </summary>
         public async Task<long> GetTotalRowCount(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            Log.Information("Getting total row count from file: {FilePath}", filePath);
-            using (var package = new ExcelPackage(fileInfo))
-            {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
-                if (worksheet.Dimension == null)
-                    return 0;
-                var totalRecords = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
-                Log.Information("Total Rows in Excel ......: {TotalRecord}", totalRecords);
-                return totalRecords;
-            }
+            return await Task.Run(() =>
+              {
+                  var fileInfo = new FileInfo(filePath);
+                  Log.Information("Getting total row count from file: {FilePath}", filePath);
+                  using (var package = new ExcelPackage(fileInfo))
+                  {
+                      ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                      Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
+                      if (worksheet.Dimension == null)
+                          return 0;
+                      var totalRecords = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
+                      Log.Information("Total Rows in Excel ......: {TotalRecord}", totalRecords);
+                      return totalRecords;
+                  }
+              });
         }
 
         /// <summary>
@@ -125,23 +124,24 @@ namespace ExcelAppCR.Service
             {
                 if (filePath == null)
                     return;
+                // 1. Tạo đối tượng FileInfo cho file gốc
                 var fileInfo = new FileInfo(filePath);
                 Log.Information("Name FilePath: {FilePath}", filePath);
 
+                // 2. Tạo file tạm trong thư mục temp của hệ thống
                 var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".xlsx");
                 Log.Information("Temp FilePath: {TempFilePath}", tempFilePath);
 
+                //3. Tạo đối tượng FileInfo cho file tạm
                 var tempFileInfo = new FileInfo(tempFilePath);
                 Log.Information("Name Temp FilePath: {TempFilePath}", tempFileInfo);
 
-                // 1. Sao chép file gốc sang file tạm
-
                 try
                 {
-                    // sao chép file gốc sang file tạm 
+                    //4. Copy file gốc sang file tạm
                     fileInfo.CopyTo(tempFileInfo.FullName, true);
 
-                    // 2. Mở file tạm và áp dụng các thay đổi
+                    //5. Mở file tạm và áp dụng các thay đổi
                     using (var package = new ExcelPackage(tempFileInfo))
                     {
                         var worksheet = package.Workbook.Worksheets[0];
@@ -152,18 +152,16 @@ namespace ExcelAppCR.Service
                         }
                         package.Save();
                     }
-                    // copy đè file tạm lên file gốc
+                    // 6. Sau khi lưu thành công, ghi đè file gốc bằng file tạm
                     tempFileInfo.CopyTo(fileInfo.FullName, true);
-
                 }
-
-
                 catch (Exception ex)
                 {
                     Log.Error("Error saving to Excel file: {Message}", ex.Message);
                 }
                 finally
                 {
+                   
                     if (tempFileInfo.Exists)
                     {
                         tempFileInfo.Delete();
@@ -186,7 +184,9 @@ namespace ExcelAppCR.Service
                 {
 
                     var fi = new FileInfo(filePath);
-                    if (fi.Exists) fi.Delete();
+
+                    if (fi.Exists) 
+                        fi.Delete();
 
                     using (var pkg = new ExcelPackage())
                     {
