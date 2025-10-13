@@ -12,7 +12,6 @@ namespace ExcelAppCR.Service
     public static class UpdateService
     {
         private const string appCastUrl = "https://raw.githubusercontent.com/Tcon03/ExcelAppCR/refs/heads/master/Version.xml";
-       
         public static void CheckForUpdates()
         {
             AutoUpdater.ReportErrors = true;

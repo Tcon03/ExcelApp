@@ -182,7 +182,6 @@ namespace ExcelAppCR.Service
             {
                 try
                 {
-
                     var fi = new FileInfo(filePath);
 
                     if (fi.Exists) 

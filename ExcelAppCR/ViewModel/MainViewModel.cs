@@ -263,16 +263,14 @@ namespace ExcelAppCR.ViewModel
             {
                 IsProcessing = true;
 
-                // 1) Xóa cache vì page-size thay đổi
+            
                 _pageCache.Clear();
 
-                // 2) Nếu đã biết TotalRecords thì tính lại TotalPages
                 if (TotalRecords > 0)
                 {
                     TotalPages = (int)Math.Ceiling((double)TotalRecords / newSize);
                 }
 
-                // 3A) Cách đơn giản: về trang 1
                 PageIndex = 1;
 
                 RefreshPaging();
