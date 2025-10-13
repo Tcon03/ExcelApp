@@ -1,4 +1,4 @@
-﻿using ExcelAppCR.Service;
+﻿using ExcelApp.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ExcelAppCR.View
+namespace ExcelApp.View
 {
     /// <summary>
     /// Interaction logic for ExcelAppCRMain.xaml

@@ -1,4 +1,4 @@
-﻿using ExcelAppCR.Commands;
+﻿using ExcelApp.Commands;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace ExcelAppCR.ViewModel
+namespace ExcelApp.ViewModel
 {
     public abstract class PaggingVM : ViewModelBase
     {

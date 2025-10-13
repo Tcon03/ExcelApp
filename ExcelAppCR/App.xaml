@@ -1,7 +1,7 @@
-﻿<Application x:Class="ExcelAppCR.App"
+﻿<Application x:Class="ExcelApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:ExcelAppCR"
+             xmlns:local="clr-namespace:ExcelApp"
              StartupUri="View\ExcelAppCRMain.xaml">
     <Application.Resources>
         <ResourceDictionary>

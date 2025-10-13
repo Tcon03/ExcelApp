@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace ExcelAppCR.Service
+namespace ExcelApp.Service
 {
     public static class UpdateService
     {

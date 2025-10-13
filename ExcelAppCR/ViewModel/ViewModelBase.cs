@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExcelAppCR.ViewModel
+namespace ExcelApp.ViewModel
 {
     public class ViewModelBase : INotifyPropertyChanged
     {
