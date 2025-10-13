@@ -1,6 +1,6 @@
-﻿using ExcelAppCR.Commands;
-using ExcelAppCR.Model;
-using ExcelAppCR.Service;
+﻿using ExcelApp.Commands;
+using ExcelApp.Model;
+using ExcelApp.Service;
 using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using Serilog;
@@ -21,7 +21,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 
 
-namespace ExcelAppCR.ViewModel
+namespace ExcelApp.ViewModel
 {
     public enum ViewState
     {
@@ -91,7 +91,7 @@ namespace ExcelAppCR.ViewModel
 
         private readonly List<string> _addedColumns = new List<string>();
 
-        private ViewState _currentState = ViewState.Empty; // Trạng thái ban đầu
+        private ViewState _currentState = ViewState.Empty;
         public ViewState CurrentState
         {
             get => _currentState;
@@ -223,9 +223,12 @@ namespace ExcelAppCR.ViewModel
             }
             try
             {
+                // tạo ra 10 cột mặc định
                 var table = new DataTable();
-                for (int i = 1; i <= 10; i++) table.Columns.Add($"Column {i}", typeof(string));
+                for (int i = 1; i <= 10; i++)
+                    table.Columns.Add($"Column {i}", typeof(string));
 
+                // thêm 20 bản ghi mặc định cho các cột 
                 for (int i = 0; i < 20; i++)
                 {
                     var row = table.NewRow();
@@ -263,16 +266,14 @@ namespace ExcelAppCR.ViewModel
             {
                 IsProcessing = true;
 
-                // 1) Xóa cache vì page-size thay đổi
+            
                 _pageCache.Clear();
 
-                // 2) Nếu đã biết TotalRecords thì tính lại TotalPages
                 if (TotalRecords > 0)
                 {
                     TotalPages = (int)Math.Ceiling((double)TotalRecords / newSize);
                 }
 
-                // 3A) Cách đơn giản: về trang 1
                 PageIndex = 1;
 
                 RefreshPaging();

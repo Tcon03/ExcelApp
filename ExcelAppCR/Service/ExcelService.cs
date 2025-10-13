@@ -1,4 +1,4 @@
-﻿using ExcelAppCR.Model;
+﻿using ExcelApp.Model;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
 using Serilog;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 
-namespace ExcelAppCR.Service
+namespace ExcelApp.Service
 {
     public class ExcelService
     {
@@ -182,7 +182,6 @@ namespace ExcelAppCR.Service
             {
                 try
                 {
-
                     var fi = new FileInfo(filePath);
 
                     if (fi.Exists) 

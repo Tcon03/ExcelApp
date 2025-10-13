@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExcelAppCR.Model
+namespace ExcelApp.Model
 {
     public class ExcelFileInfo
     {

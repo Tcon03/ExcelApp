@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ExcelAppCR.Commands
+namespace ExcelApp.Commands
 {
     public class VfxCommand : ICommand
     {

@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 
-namespace ExcelAppCR.View.UserControls
+namespace ExcelApp.View.UserControls
 {
     /// <summary>
     /// Interaction logic for ExcelUser.xaml
