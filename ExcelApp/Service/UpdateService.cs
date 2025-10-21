@@ -11,7 +11,7 @@ namespace ExcelApp.Service
 {
     public static class UpdateService
     {
-        private const string appCastUrl = "https://raw.githubusercontent.com/Tcon03/ExcelAppCR/refs/heads/master/Version.xml";
+        
         public static void CheckForUpdates()
         {
             AutoUpdater.ReportErrors = true;
@@ -20,7 +20,8 @@ namespace ExcelApp.Service
             AutoUpdater.ClearAppDirectory = true;
             //AutoUpdater.InstallationPath = AppDomain.CurrentDomain.BaseDirectory;
             AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
-            AutoUpdater.Start(appCastUrl);
+            var link = Utils.Constant.UpdateSorfwareLink;
+             AutoUpdater.Start(link);
         }
 
         private static void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)

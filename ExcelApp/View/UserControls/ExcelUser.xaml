@@ -182,7 +182,7 @@
                     <DataGrid.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="Padding" Value="5,3"/>
-                            <Setter Property="Margin" Value="5 0"/>
+                            <Setter Property="Margin" Value=" 0"/>
                             <Setter Property="FontSize" Value="15"/>
                             <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="MinHeight" Value="35"/>

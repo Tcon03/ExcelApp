@@ -24,7 +24,7 @@ namespace ExcelApp.View
         public ExcelAppCRMain()
         {
             InitializeComponent();
-            UpdateService.CheckForUpdates();
+         
         }
 
         private void btn_Menu(object sender, RoutedEventArgs e)

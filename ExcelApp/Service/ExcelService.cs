@@ -1,14 +1,18 @@
 ﻿using ExcelApp.Model;
 using OfficeOpenXml;
+using OfficeOpenXml.Table;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 
 namespace ExcelApp.Service
 {
@@ -92,20 +96,20 @@ namespace ExcelApp.Service
         public async Task<long> GetTotalRowCount(string filePath)
         {
             return await Task.Run(() =>
-            {
-                var fileInfo = new FileInfo(filePath);
-                Log.Information("Getting total row count from file: {FilePath}", filePath);
-                using (var package = new ExcelPackage(fileInfo))
-                {
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                    Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
-                    if (worksheet.Dimension == null)
-                        return 0;
-                    var totalRecords = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
-                    Log.Information("Total Rows in Excel ......: {TotalRecord}", totalRecords);
-                    return totalRecords;
-                }
-            });
+              {
+                  var fileInfo = new FileInfo(filePath);
+                  Log.Information("Getting total row count from file: {FilePath}", filePath);
+                  using (var package = new ExcelPackage(fileInfo))
+                  {
+                      ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                      Log.Information("Worksheet Name: {SheetName}", worksheet.Name);
+                      if (worksheet.Dimension == null)
+                          return 0;
+                      var totalRecords = worksheet.Dimension.Rows - 1; // trừ đi 1 để loại bỏ hàng tiêu đề
+                      Log.Information("Total Rows in Excel ......: {TotalRecord}", totalRecords);
+                      return totalRecords;
+                  }
+              });
         }
 
         /// <summary>
@@ -114,7 +118,7 @@ namespace ExcelApp.Service
         /// <param name="filePath"></param>
         /// <param name="changes"></param>
         /// <returns></returns>
-        public async Task SaveToFile(string filePath, List<CellChange> changes)
+        public async Task SaveToFile(string filePath, List<ExcelFileInfo> changes)
         {
             await Task.Run(() =>
             {
@@ -157,7 +161,7 @@ namespace ExcelApp.Service
                 }
                 finally
                 {
-
+                   
                     if (tempFileInfo.Exists)
                     {
                         tempFileInfo.Delete();
@@ -180,7 +184,7 @@ namespace ExcelApp.Service
                 {
                     var fi = new FileInfo(filePath);
 
-                    if (fi.Exists)
+                    if (fi.Exists) 
                         fi.Delete();
 
                     using (var pkg = new ExcelPackage())
