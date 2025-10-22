@@ -1,10 +1,11 @@
-﻿using ExcelApp.Commands;
+﻿using AutoUpdaterDotNET;
+using ExcelApp.Commands;
 using ExcelApp.Model;
 using ExcelApp.Service;
 using MahApps.Metro.Controls.Dialogs;
+using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using Serilog;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -91,6 +92,7 @@ namespace ExcelApp.ViewModel
 
         private readonly List<string> _addedColumns = new List<string>();
 
+
         private ViewState _currentState = ViewState.Empty;
         public ViewState CurrentState
         {
@@ -114,6 +116,7 @@ namespace ExcelApp.ViewModel
         public ICommand NewFile { get; set; }
         public ICommand AddRowCommand { get; set; }
         public ICommand AddColumnCommand { get; set; }
+        public ICommand LoadedUpdater { get; set; }
         public void InitData()
         {
             _excelService = new ExcelService();
@@ -122,7 +125,13 @@ namespace ExcelApp.ViewModel
             NewFile = new VfxCommand(OnNewFile, () => true);
             AddRowCommand = new VfxCommand(OnAddRow, () => true);
             AddColumnCommand = new VfxCommand(OnAddColumn, () => true);
-            CurrentState = ViewState.Empty;
+            CurrentState = ViewState.Empty; 
+            LoadedUpdater = new VfxCommand(OnLoadedUpdater, () => true);
+        }
+
+        private void OnLoadedUpdater(object obj)
+        {
+            CheckForUpdates();
         }
 
         private void OnAddColumn(object obj)
@@ -481,7 +490,74 @@ namespace ExcelApp.ViewModel
             }
         }
 
+        public static void CheckForUpdates()
+        {
+            AutoUpdater.ReportErrors = true;
+            AutoUpdater.RunUpdateAsAdmin = false;
+            AutoUpdater.Synchronous = false;
+            AutoUpdater.ClearAppDirectory = true;
+            //AutoUpdater.InstallationPath = AppDomain.CurrentDomain.BaseDirectory;
+            AutoUpdater.CheckForUpdateEvent += AutoUpdaterOnCheckForUpdateEvent;
+            var link = Utils.Constant.UpdateSorftwareUrl;
+            AutoUpdater.Start(link);
+        }
 
+        private static void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
+        {
+            var _dispatcher = Application.Current.Dispatcher;
+            if (args == null)
+            {
+                _dispatcher.Invoke(() =>
+                    MessageBox.Show("Không thể kiểm tra cập nhật. Kiểm tra lại mạng hoặc URL XML.",
+                        "Cập nhật", MessageBoxButton.OK, MessageBoxImage.Warning));
+                return;
+            }
+            if (args.Error != null)
+            {
+                _dispatcher.Invoke(() =>
+                    MessageBox.Show(
+                        $"Không thể kiểm tra cập nhật. Vui lòng kiểm tra lại kết nối mạng hoặc URL.\nLỗi: {args.Error.Message}",
+                        "Lỗi Cập Nhật", MessageBoxButton.OK, MessageBoxImage.Error));
+                return;
+            }
+
+            // check if it is the latest version then skip
+            if (!args.IsUpdateAvailable)
+            {
+                _dispatcher.Invoke(() =>
+                MessageBox.Show("Bạn đang ở phiên bản mới nhất :" + args.InstalledVersion , "Thông Báo" , MessageBoxButton.OK , MessageBoxImage.Information));
+                return;
+            }
+            _dispatcher.Invoke(() =>
+            {
+                var result = MessageBox.Show(
+                     $"Phát hiện phiên bản mới!\n\n" +
+                     $"Phiên bản hiện tại: v{args.InstalledVersion}\n" +
+                     $"Phiên bản mới: v{args.CurrentVersion}\n\n" +
+                     $"Bạn có muốn cập nhật ngay không?\n",
+                     "Thông báo cập nhật",
+                     MessageBoxButton.YesNo,
+                     MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        if (AutoUpdater.DownloadUpdate(args))
+                        {
+                            Application.Current.Shutdown();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"Lỗi trong quá trình cập nhật: {ex.Message}",
+                            "Lỗi",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            });
+        }
         public override async void OnNextPage(object obj)
         {
             try

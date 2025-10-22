@@ -1,4 +1,5 @@
 ﻿using ExcelApp.Service;
+using ExcelApp.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,13 +25,14 @@ namespace ExcelApp.View
         public ExcelAppCRMain()
         {
             InitializeComponent();
-            UpdateService.CheckForUpdates();
+            MainViewModel.CheckForUpdates();
         }
 
         private void btn_Menu(object sender, RoutedEventArgs e)
         {
             Button bt = sender as Button;
-            if (bt == null || bt.ContextMenu == null) return;
+            if (bt == null || bt.ContextMenu == null)
+                return;
 
             bt.ContextMenu.PlacementTarget = bt;
             bt.ContextMenu.Placement = PlacementMode.Bottom;
