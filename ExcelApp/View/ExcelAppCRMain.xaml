@@ -71,6 +71,7 @@
                                  VerticalAlignment="Center"
                                  Margin="10 5 0 0"/>
                         </StackPanel>
+                        
                         <Button.ContextMenu>
                             <ContextMenu FontSize="15" 
                                          Margin="5" 
@@ -90,6 +91,8 @@
                                         Header="_Save"
                                         Foreground="Black"
                                         Command="{Binding SaveFileCommand}"/>
+                                <MenuItem Header="Update" 
+                                          Command="{Binding LoadedUpdater}"/>
 
                                 <Separator/>
                                 <MenuItem Header="E_xit" 
